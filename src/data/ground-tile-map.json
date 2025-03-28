@@ -1,0 +1,39 @@
+{ "compressionlevel":-1,
+ "height":8,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[1, 1, 1, 1, 2, 2, 1, 1, 1, 2,
+            1, 1, 1, 1, 16, 6, 3, 3, 3, 17,
+            19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+            23, 23, 23, 23, 23, 23, 35, 21, 21, 21,
+            31, 31, 31, 31, 31, 31, 22, 31, 31, 31,
+            31, 31, 31, 31, 31, 31, 22, 31, 31, 31,
+            31, 34, 23, 23, 23, 23, 33, 23, 23, 23,
+            31, 22, 31, 31, 31, 31, 22, 31, 31, 31],
+         "height":8,
+         "id":1,
+         "name":"\u0421\u043b\u043e\u0439 \u0442\u0430\u0439\u043b\u043e\u0432 1",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":10,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":2,
+ "nextobjectid":1,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.11.2",
+ "tileheight":64,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"terrainTiles_default.tsx"
+        }],
+ "tilewidth":64,
+ "type":"map",
+ "version":"1.10",
+ "width":10
+}
