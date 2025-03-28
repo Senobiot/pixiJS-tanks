@@ -1,4 +1,4 @@
-import { Sprite, Texture, Container } from 'pixi.js';
+import { Sprite } from 'pixi.js';
 
 export default class Bullet {
   _speed = 3;
@@ -8,6 +8,7 @@ export default class Bullet {
     this.sprite.x = x;
     this.sprite.y = y;
     this.direction = direction;
+    this.rotation = direction;
   }
 
   get view() {
@@ -15,7 +16,7 @@ export default class Bullet {
   }
 
   update = () => {
-    this.sprite.x += Math.sin(this.direction) * this._speed;
-    this.sprite.y -= Math.cos(this.direction) * this._speed;
+    this.sprite.x -= Math.sin(this.direction) * this._speed;
+    this.sprite.y += Math.cos(this.direction) * this._speed;
   };
 }
