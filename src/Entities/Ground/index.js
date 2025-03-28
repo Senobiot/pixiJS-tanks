@@ -1,5 +1,5 @@
 import { Sprite, Texture, Rectangle } from 'pixi.js';
-import groundData from '../data/ground-tile-map.json';
+import groundData from '../../data/ground-tile-map.json';
 
 const createGroundTextures = (
   stage,

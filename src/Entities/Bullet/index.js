@@ -3,14 +3,13 @@ import { Sprite } from 'pixi.js';
 export default class Bullet {
   _speed = 3;
 
-  constructor(texture, x, y, direction) {
+  constructor(texture, direction) {
     this.sprite = new Sprite(texture);
-    this.sprite.x = x;
-    this.sprite.y = y;
+    this.sprite.x = 0;
+    this.sprite.y = 0;
     this.direction = direction;
-    this.rotation = direction;
+    this.sprite.rotation = direction;
   }
-
   get view() {
     return this.bullet;
   }
