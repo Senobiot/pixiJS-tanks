@@ -29,10 +29,10 @@ import {
   document.getElementById('pixi-container').appendChild(app.canvas);
   document.addEventListener('keydown', (e) => keyDownHandler(e, moving));
   document.addEventListener('keyup', (e) => keyUpHandler(e, moving));
-  document.addEventListener('keydown', (e) => keySpaceHandler(e, shoot));
 
   await Assets.init({ manifest });
   const spritesheet = await Assets.load('/assets/terrainTiles.png'); // load ground map
+  const bullet = await Assets.load('/assets/bulletRed3.png');
   createGroundTextures(app.stage, spritesheet); // draw ground
   const assets = await Assets.loadBundle('tank-red');
 
@@ -47,42 +47,22 @@ import {
     barrel: {
       texture: assets.barrel,
     },
+    bullet: {
+      texture: bullet,
+    },
+    stageDimensions: {
+      width: app.stage.width,
+      height: app.stage.height,
+    },
   });
-
+  document.addEventListener('keydown', (e) => keySpaceHandler(e, tank.shoot));
   app.stage.addChild(tank.view);
 
-  //  tank.view.interactive = true;
-  // read docs
-  const bullets = [];
-  function shoot() {
-    const bullet = new Sprite(Texture.WHITE);
-    bullet.width = 10;
-    bullet.height = 10;
-    bullet.x = tank.view.x + tank.view.width / 2;
-    bullet.y = tank.view.y + tank.view.height / 2;
-    app.stage.addChild(bullet);
-    bullets.push(bullet);
-  }
-
   app.ticker.add((time) => {
-    const direction = tank.view.rotation;
-    bullets.forEach((bullet, index) => {
-      const speed = 5;
-      bullet.x += Math.sin(direction) * speed * time.deltaTime;
-      bullet.y += Math.cos(direction) * speed * time.deltaTime;
-      if (
-        bullet.x < 0 ||
-        bullet.x > app.screen.width ||
-        bullet.y < 0 ||
-        bullet.y > app.screen.height
-      ) {
-        app.stage.removeChild(bullet);
-        bullets.splice(index, 1);
-      }
-    });
-  });
+    if (tank.bullets.length) {
+      tank.update();
+    }
 
-  app.ticker.add((time) => {
     if (moving.isMoving) {
       if (!moving.isRotating) {
         if (moving.up || moving.down) moving.targetRotation = Math.PI;
