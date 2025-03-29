@@ -9,23 +9,41 @@ const keyToProperty = {
   ArrowDown: 'drivingDown',
 };
 
-export const keyDownHandler = (event, tank) => {
+export const keyDownHandler = (event, game) => {
   const direction = keyToProperty[event.key];
   if (direction) {
-    tank.isMoving = true;
-    tank.movingDirection = direction;
+    game.tank.isMoving = true;
+    game.tank.movingDirection = direction;
   }
   if (event.key === ' ') {
-    tank.shoot();
+    game.tank.shoot();
+  }
+
+  if (event.key === '`') {
+    game.addEnemy();
   }
 };
 
-export const keyUpHandler = (event, tank) => {
+export const keyUpHandler = (event, game) => {
   const direction = keyToProperty[event.key];
   if (direction) {
-    if (tank.movingDirection === direction) {
-      tank.isMoving = false;
+    if (game.tank.movingDirection === direction) {
+      game.tank.isMoving = false;
       //  tank.movingDirection = null;
     }
   }
+};
+
+export const isCollision = (s1, s2) => {
+  if (!s1 || !s2) return;
+
+  const b1 = s1.getBounds();
+  const b2 = s2.getBounds();
+
+  return (
+    b1.x < b2.x + b2.width &&
+    b1.x + b1.width > b2.x &&
+    b1.y < b2.y + b2.height &&
+    b1.y + b1.height > b2.y
+  );
 };
