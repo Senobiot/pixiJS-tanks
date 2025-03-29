@@ -5,9 +5,12 @@ export default class Enemy extends Tank {
   constructor(...args) {
     super(...args);
     this.initialPosition();
-    this.setRandomDirection();
+    // this.setRandomDirection();
     this.changeDirectionInterval = 2000;
-    setInterval(() => this.setRandomDirection(), this.changeDirectionInterval);
+    this.intervalId = setInterval(
+      () => this.setRandomDirection(),
+      this.changeDirectionInterval
+    );
   }
 
   initialPosition() {
@@ -34,40 +37,52 @@ export default class Enemy extends Tank {
 
   setRandomDirection = () => {
     this.shoot();
-    const direction = Math.floor(Math.random() * 2);
-    if (direction) {
+
+    const isHorizontal = Math.random() < 0.5;
+
+    if (isHorizontal) {
       this.directionX = Math.floor(Math.random() * 3) - 1; // -1: left | 0: isMoving = false, 1: right
-      if (this.directionX > 0) {
-        this.isMoving = true;
-        this.movingDirection = 'drivingRight';
-        this.drivingRight = true;
-      } else if (this.directionX < 0) {
-        this.isMoving = true;
-        this.movingDirection = 'drivingLeft';
-        this.drivingLeft = true;
-      } else {
-        this.isMoving = false;
-      }
       this.directionY = 0;
+      this.updateMovementState('X', this.directionX);
     } else {
-      this.directionY = Math.floor(Math.random() * 3) - 1; // -1: up | 0: stay | 1: down
-      if (this.directionY > 0) {
-        this.isMoving = true;
-        this.movingDirection = 'drivingDown';
-        this.directionY = true;
-      } else if (this.directionX < 0) {
-        this.isMoving = true;
-        this.movingDirection = 'drivingUp';
-        this.drivingUp = true;
-      } else {
-        this.isMoving = false;
-      }
+      this.directionY = Math.floor(Math.random() * 3) - 1; // 1: up | 0: stay | 1: down
       this.directionX = 0;
+      this.updateMovementState('Y', this.directionY);
     }
   };
 
-  update = () => {
-    this.updateBullets();
-    this.movingBehavior();
+  updateMovementState = (axis, initialDirection) => {
+    let direction = initialDirection;
+
+    if (direction === 0) {
+      console.log('direction === 0');
+      this.isMoving = false;
+      return;
+    }
+
+    if (this.isNearBorder) {
+      direction = -initialDirection;
+    }
+    this.isMoving = true;
+
+    if (axis === 'X') {
+      this.movingDirection = direction > 0 ? 'drivingRight' : 'drivingLeft';
+      this.drivingRight = direction > 0;
+      this.drivingLeft = direction < 0;
+    } else {
+      this.movingDirection = direction > 0 ? 'drivingDown' : 'drivingUp';
+      this.drivingDown = direction > 0;
+      this.drivingUp = direction < 0;
+    }
   };
+
+  selfDestroy = () => {
+    super.selfDestroy();
+    clearInterval(this.intervalId);
+  };
+
+  // update = () => {
+  //   this.updateBullets();
+  //   this.movingBehavior();
+  // };
 }

@@ -99,6 +99,9 @@ export default class Tank {
       ) {
         this._view.x = newX;
         this._view.y = newY;
+        this.isNearBorder = false;
+      } else {
+        this.isNearBorder = true;
       }
     }
   };
@@ -128,4 +131,12 @@ export default class Tank {
       this.movingBehavior();
     }
   };
+
+  selfDestroy() {
+    if (this.bullets.length) {
+      this.bullets.forEach((e) => e.sprite.destroy());
+      this.bullets = [];
+    }
+    this.view.destroy();
+  }
 }

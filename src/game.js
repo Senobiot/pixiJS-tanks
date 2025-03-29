@@ -8,6 +8,7 @@ import {
 import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
+import Score from './Entities/Score';
 
 export default class Game {
   constructor(app, ground, bullet, tankAssets) {
@@ -39,55 +40,99 @@ export default class Game {
     this.initalEnemyAmount = 2;
     this.enemies = [];
     this.stage.addChild(this.tank.view);
+    this.scoreMeter = new Score();
+    this.scoreMeter.color = 'red';
+    this.currentScore = 0;
+    this.stage.addChild(this.scoreMeter.view);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
     this.addEnemy(this.initalEnemyAmount);
   }
 
   update = () => {
-    this.checkEnemyCollision();
-
-    this.tank.update();
+    if (this.enemies.length && this.tank) {
+      this.checkEnemyCollision();
+    }
+    if (this.tank) {
+      this.tank.update();
+    }
   };
 
-  destroyEnemy = (enemy, index) => {
-    const { x, y, width, height } = enemy.view;
+  destroyTank = (tank, index) => {
+    const { x, y, width, height } = tank.view;
     const explosionX = x - width;
     const explosionY = y - height;
+    tank.selfDestroy();
 
-    if (enemy.bullets.length) {
-      enemy.bullets.forEach((e) => e.sprite.destroy()); //delete enemy bullets if hit him
-      enemy.bullets = [];
+    if (index !== -1) {
+      this.enemies.splice(index, 1); // need to rewrite with filter
+    } else {
+      this.tank = null;
+      const temp = new Score({
+        fz: 50,
+        initial: 'GAME OVER',
+      }).view;
+      temp.align = 'center';
+
+      this.stage.addChild(temp);
+      this.enemies.forEach((enemy) => enemy.selfDestroy());
+      this.enemies = [];
     }
-    enemy.view.destroy();
-    this.enemies.splice(index, 1); // need to rewrite with filter
-
     const explosion = this.explosion.createAnimation({
       x: explosionX,
       y: explosionY,
     });
-
+    this.currentScore += 100;
+    this.scoreMeter.text = this.currentScore;
     this.stage.addChild(explosion);
   };
 
   checkEnemyCollision() {
     if (this.enemies.length) {
       for (let index = 0; index < this.enemies.length; index++) {
-        this.enemies[index].update();
-        if (this.tank.bullets[0]) {
-          if (
-            isCollision(this.enemies[index].view, this.tank.bullets[0].sprite)
+        if (this.tank.bullets.length) {
+          for (let bullIdx = 0; bullIdx < this.tank.bullets.length; bullIdx++) {
+            if (
+              isCollision(
+                this.enemies[index].view,
+                this.tank.bullets[bullIdx].sprite
+              )
+            ) {
+              return this.destroyTank(this.enemies[index], index);
+            }
+          }
+        }
+        if (this.enemies[index].bullets.length) {
+          for (
+            let enemyBulletIdx = 0;
+            enemyBulletIdx < this.enemies[index].bullets.length;
+            enemyBulletIdx++
           ) {
-            this.destroyEnemy(this.enemies[index], index);
-            break;
+            if (
+              isCollision(
+                this.enemies[index].bullets[enemyBulletIdx].sprite,
+                this.tank.view
+              )
+            ) {
+              return this.destroyTank(this.tank, -1);
+            }
           }
         }
 
-        if (this.tank.isMoving && this.enemies.length) {
+        if (this.tank) {
           if (isCollision(this.enemies[index].view, this.tank.view)) {
-            this.destroyEnemy(this.enemies[index], index);
+            // if (this.tank.isMoving && this.enemies.length) { ?????
+            // if (this.tank.isMoving) {
+            //   if (isCollision(this.enemies[index].view, this.tank.view)) {
+            //     this.destroyEnemy(this.enemies[index], index); // Destoy if collide with enemy
+            //   }
+            // }
+
+            this.enemies[index].isMoving = false;
           }
         }
+
+        this.enemies[index].update();
       }
     }
   }
