@@ -6,6 +6,7 @@ import {
   keyUpHandler,
 } from './utils';
 import Tank from './Entities/Tank';
+import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
 
 export default class Game {
@@ -35,10 +36,12 @@ export default class Game {
 
     this.explosion = new ExplosionFabric();
     this.tank = new Tank(this.defaultTankProperties);
+    this.initalEnemyAmount = 2;
     this.enemies = [];
     this.stage.addChild(this.tank.view);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
+    this.addEnemy(this.initalEnemyAmount);
   }
 
   update = () => {
@@ -47,12 +50,16 @@ export default class Game {
     this.tank.update();
   };
 
-  destroyEmeny = (enemy, index) => {
-    const { x, y, width, height } = enemy;
+  destroyEnemy = (enemy, index) => {
+    const { x, y, width, height } = enemy.view;
     const explosionX = x - width;
     const explosionY = y - height;
 
-    enemy.destroy();
+    if (enemy.bullets.length) {
+      enemy.bullets.forEach((e) => e.sprite.destroy()); //delete enemy bullets if hit him
+      enemy.bullets = [];
+    }
+    enemy.view.destroy();
     this.enemies.splice(index, 1); // need to rewrite with filter
 
     const explosion = this.explosion.createAnimation({
@@ -66,26 +73,30 @@ export default class Game {
   checkEnemyCollision() {
     if (this.enemies.length) {
       for (let index = 0; index < this.enemies.length; index++) {
+        this.enemies[index].update();
         if (this.tank.bullets[0]) {
           if (
             isCollision(this.enemies[index].view, this.tank.bullets[0].sprite)
           ) {
-            this.destroyEmeny(this.enemies[index].view, index);
+            this.destroyEnemy(this.enemies[index], index);
+            break;
           }
         }
 
         if (this.tank.isMoving && this.enemies.length) {
           if (isCollision(this.enemies[index].view, this.tank.view)) {
-            this.destroyEmeny(this.enemies[index].view, index);
+            this.destroyEnemy(this.enemies[index], index);
           }
         }
       }
     }
   }
 
-  addEnemy = () => {
-    const enemey = new Tank(this.defaultTankProperties);
-    this.enemies.push(enemey);
-    this.stage.addChild(enemey.view);
+  addEnemy = (amount = 1) => {
+    for (let index = 1; index <= amount; index++) {
+      const enemey = new Enemy({ ...this.defaultTankProperties, speed: 0.5 });
+      this.enemies.push(enemey);
+      this.stage.addChild(enemey.view);
+    }
   };
 }

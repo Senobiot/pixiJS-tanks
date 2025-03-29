@@ -49,6 +49,9 @@ export default class Tank {
   }
 
   shoot = () => {
+    if (!this._view.parent) {
+      return;
+    }
     const barrelGlobalPosition = this._barrel.toGlobal(
       new Point(0, this._barrel.height)
     );
@@ -105,7 +108,7 @@ export default class Tank {
     return delta > Math.PI ? delta - Math.PI * 2 : delta;
   };
 
-  update = () => {
+  updateBullets = () => {
     if (this.bullets.length) {
       this.bullets = this.bullets.filter((bullet) => {
         bullet.update();
@@ -116,6 +119,11 @@ export default class Tank {
         return true;
       });
     }
+  };
+
+  update = () => {
+    this.updateBullets();
+
     if (this.isMoving) {
       this.movingBehavior();
     }
