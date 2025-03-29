@@ -22,5 +22,15 @@ export const manifest = {
         },
       ],
     },
+    {
+      name: 'explosion',
+      assets: [
+        { alias: 'explosionFrame1', src: '/assets/explosion1.png' },
+        { alias: 'explosionFrame2', src: '/assets/explosion2.png' },
+        { alias: 'explosionFrame3', src: '/assets/explosion3.png' },
+        { alias: 'explosionFrame4', src: '/assets/explosion4.png' },
+        { alias: 'explosionFrame5', src: '/assets/explosion5.png' },
+      ],
+    },
   ],
 };

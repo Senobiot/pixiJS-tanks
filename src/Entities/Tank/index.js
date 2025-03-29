@@ -8,7 +8,7 @@ export default class Tank {
     bullet,
     position,
     stageDimensions,
-    speed = 0.5,
+    speed = 1,
     rotationSpeed = 0.05,
   }) {
     this._view = new Container();
@@ -23,7 +23,6 @@ export default class Tank {
     this._barrel.anchor.set(0.5, 0);
 
     this._view.addChild(this._barrel);
-
     this.stageWidth = stageDimensions.width;
     this.stageHeight = stageDimensions.height;
     this.bulletTexture = bullet.texture;
@@ -86,8 +85,18 @@ export default class Tank {
         Math.sign(rotationDelta) *
         Math.min(Math.abs(rotationDelta), this.rotationSpeed);
     } else {
-      this._view.x += this.speed * target.x;
-      this._view.y += this.speed * target.y;
+      const newX = this._view.x + this.speed * target.x;
+      const newY = this._view.y + this.speed * target.y;
+
+      if (
+        !this.outOfBounds(
+          newX + (target.x * this._view.width) / 2,
+          newY + (target.y * this._view.height) / 2
+        )
+      ) {
+        this._view.x = newX;
+        this._view.y = newY;
+      }
     }
   };
 
