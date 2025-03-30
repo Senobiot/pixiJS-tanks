@@ -1,9 +1,12 @@
 import { Point } from 'pixi.js';
 import Tank from '../Tank';
+import { TYPE } from '../../constants';
 
 export default class Enemy extends Tank {
   constructor(...args) {
     super(...args);
+    this.type = TYPE.tank.enemy;
+    this.bulletType = TYPE.bullets.enemy;
     this.initialPosition();
     // this.setRandomDirection();
     this.changeDirectionInterval = 2000;
@@ -15,13 +18,10 @@ export default class Enemy extends Tank {
 
   initialPosition() {
     const possibleStartPositions = [
-      new Point(this.stageWidth / 4, this.view.height / 2),
-      new Point((this.stageWidth / 4) * 3, this.view.height / 2),
-      new Point(this.stageWidth / 4, this.stageHeight - this.view.height / 2),
-      new Point(
-        (this.stageWidth / 4) * 3,
-        this.stageHeight - this.view.height / 2
-      ),
+      new Point(this.stageWidth / 4, this.height / 2),
+      new Point((this.stageWidth / 4) * 3, this.height / 2),
+      new Point(this.stageWidth / 4, this.stageHeight - this.height / 2),
+      new Point((this.stageWidth / 4) * 3, this.stageHeight - this.height / 2),
     ];
 
     const initialPosition =
@@ -31,8 +31,8 @@ export default class Enemy extends Tank {
     console.log(
       `enemy Initial position ${(initialPosition.x, initialPosition.y)}`
     );
-    this._view.x = initialPosition.x;
-    this._view.y = initialPosition.y;
+    this.x = initialPosition.x;
+    this.y = initialPosition.y;
   }
 
   setRandomDirection = () => {
@@ -43,17 +43,19 @@ export default class Enemy extends Tank {
     if (isHorizontal) {
       this.directionX = Math.floor(Math.random() * 3) - 1; // -1: left | 0: isMoving = false, 1: right
       this.directionY = 0;
+      console.log(this.directionX);
       this.updateMovementState('X', this.directionX);
     } else {
       this.directionY = Math.floor(Math.random() * 3) - 1; // 1: up | 0: stay | 1: down
       this.directionX = 0;
+      console.log(this.directionY);
       this.updateMovementState('Y', this.directionY);
     }
   };
 
   updateMovementState = (axis, initialDirection) => {
     let direction = initialDirection;
-
+    console.log('');
     if (direction === 0) {
       console.log('direction === 0');
       this.isMoving = false;

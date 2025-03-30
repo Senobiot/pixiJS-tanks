@@ -1,3 +1,4 @@
+import { initDevtools } from '@pixi/devtools';
 import { Application, Assets } from 'pixi.js';
 import { manifest } from './assetsMap';
 import Game from './game';
@@ -5,6 +6,7 @@ import Game from './game';
 (async () => {
   const app = new Application();
   await app.init({ width: 640, height: 512 });
+  // initDevtools({ app });
 
   // тут разобрать как это грузить сразу всё
   await Assets.init({ manifest });

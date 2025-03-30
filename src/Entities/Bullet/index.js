@@ -1,21 +1,19 @@
 import { Sprite } from 'pixi.js';
 
-export default class Bullet {
+export default class Bullet extends Sprite {
   _speed = 3;
 
-  constructor(texture, direction) {
-    this.sprite = new Sprite(texture);
-    this.sprite.x = 0;
-    this.sprite.y = 0;
+  constructor(texture, direction, type) {
+    super(texture);
+    this.x = 0;
+    this.y = 0;
     this.direction = direction;
-    this.sprite.rotation = direction;
-  }
-  get view() {
-    return this.bullet;
+    this.rotation = direction;
+    this.type = type;
   }
 
   update = () => {
-    this.sprite.x -= Math.sin(this.direction) * this._speed;
-    this.sprite.y += Math.cos(this.direction) * this._speed;
+    this.x -= Math.sin(this.direction) * this._speed;
+    this.y += Math.cos(this.direction) * this._speed;
   };
 }
