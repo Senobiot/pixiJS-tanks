@@ -1,7 +1,7 @@
 import { Container, Sprite, Point } from 'pixi.js';
 import Bullet from '../Bullet';
 import { TYPE } from '../../constants';
-export default class Tank {
+export default class Tank extends Container {
   constructor({
     body,
     barrel,
@@ -11,18 +11,18 @@ export default class Tank {
     speed = 1,
     rotationSpeed = 0.05,
   }) {
-    this._view = new Container();
-    this._view.x = position.x;
-    this._view.y = position.y;
+    super();
+    this.x = position.x;
+    this.y = position.y;
 
-    this._body = new Sprite(body.texture);
-    this._body.anchor.set(0.5);
-    this._view.addChild(this._body);
+    this.body = new Sprite(body.texture);
+    this.body.anchor.set(0.5);
+    this.addChild(this.body);
 
-    this._barrel = new Sprite(barrel.texture);
-    this._barrel.anchor.set(0.5, 0);
+    this.barrel = new Sprite(barrel.texture);
+    this.barrel.anchor.set(0.5, 0);
 
-    this._view.addChild(this._barrel);
+    this.addChild(this.barrel);
     this.stageWidth = stageDimensions.width;
     this.stageHeight = stageDimensions.height;
     this.bulletTexture = bullet.texture;
@@ -34,38 +34,26 @@ export default class Tank {
     this.drivingDown = false;
     this.bullets = [];
     this.speed = speed;
-    this._view.type = TYPE.tank.player;
+    this.type = TYPE.tank.player;
     this.bulletType = TYPE.bullets.player;
     this.rotationSpeed = rotationSpeed;
   }
 
-  get view() {
-    return this._view;
-  }
-
-  set x(num) {
-    this._view.x = num;
-  }
-  set y(num) {
-    this._view.y = num;
-  }
-
   shoot = () => {
-    if (!this._view.parent) {
-      return;
-    }
-    const barrelGlobalPosition = this._barrel.toGlobal(
-      new Point(0, this._barrel.height)
+    const barrelGlobalPosition = this.barrel.toGlobal(
+      // для отвязки пули от движения танка
+      new Point(0, this.barrel.height)
     );
 
     const bullet = new Bullet(
       this.bulletTexture,
-      this._view.rotation,
+      this.rotation,
       this.bulletType
     );
-    bullet.sprite.x = barrelGlobalPosition.x;
-    bullet.sprite.y = barrelGlobalPosition.y;
-    this._view.parent.addChild(bullet.sprite);
+
+    bullet.x = barrelGlobalPosition.x;
+    bullet.y = barrelGlobalPosition.y;
+    this.parent.addChild(bullet); // для привязки пули к сцене а не танку
     this.bullets.push(bullet);
   };
 
@@ -85,26 +73,26 @@ export default class Tank {
     if (!target) return;
 
     const rotationDelta = this.calculateShortestRotation(
-      this._view.rotation,
+      this.rotation,
       target.angle
     );
 
     if (Math.abs(rotationDelta) > 0.01) {
-      this._view.rotation +=
+      this.rotation +=
         Math.sign(rotationDelta) *
         Math.min(Math.abs(rotationDelta), this.rotationSpeed);
     } else {
-      const newX = this._view.x + this.speed * target.x;
-      const newY = this._view.y + this.speed * target.y;
+      const newX = this.x + this.speed * target.x;
+      const newY = this.y + this.speed * target.y;
 
       if (
         !this.outOfBounds(
-          newX + (target.x * this._view.width) / 2,
-          newY + (target.y * this._view.height) / 2
+          newX + (target.x * this.width) / 2,
+          newY + (target.y * this.height) / 2
         )
       ) {
-        this._view.x = newX;
-        this._view.y = newY;
+        this.x = newX;
+        this.y = newY;
         this.isNearBorder = false;
       } else {
         this.isNearBorder = true;
@@ -121,8 +109,8 @@ export default class Tank {
     if (this.bullets.length) {
       this.bullets = this.bullets.filter((bullet) => {
         bullet.update();
-        if (this.outOfBounds(bullet.sprite.x, bullet.sprite.y)) {
-          bullet.sprite.destroy();
+        if (this.outOfBounds(bullet.x, bullet.y)) {
+          bullet.destroy();
           return false;
         }
         return true;
@@ -140,9 +128,9 @@ export default class Tank {
 
   selfDestroy() {
     if (this.bullets.length) {
-      this.bullets.forEach((e) => e.sprite.destroy());
+      this.bullets.forEach((e) => e.destroy());
       this.bullets = [];
     }
-    this.view.destroy();
+    this.destroy();
   }
 }

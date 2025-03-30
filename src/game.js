@@ -45,7 +45,7 @@ export default class Game {
     this.tank = new Tank(this.defaultTankProperties);
     this.initalEnemyAmount = 2;
     this.enemies = [];
-    this.stage.addChild(this.tank.view);
+    this.stage.addChild(this.tank);
     this.scoreMeter = new Score();
     this.scoreMeter.color = 'red';
 
@@ -55,7 +55,7 @@ export default class Game {
   start = () => {
     this.addEnemy(this.initalEnemyAmount);
     this.currentScore = 0;
-    this.stage.addChild(this.scoreMeter.view);
+    this.stage.addChild(this.scoreMeter);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
   };
@@ -67,12 +67,11 @@ export default class Game {
   };
 
   update = () => {
-    if (this.enemies.length && this.tank) {
-      //this.checkEnemyCollision();
-      this.updateCollision();
-    }
     if (this.tank) {
       this.tank.update();
+    }
+    if (this.enemies.length && this.tank) {
+      this.updateCollision();
     }
   };
 
@@ -88,17 +87,16 @@ export default class Game {
 
     this.stage.addChild(explosion);
     this.currentScore += 100;
-    this.scoreMeter.text = this.currentScore;
+    this.scoreMeter.score = this.currentScore;
 
     if (index !== -1) {
-      tank.parent.selfDestroy();
-      this.enemies = this.enemies.filter(e.view !== tank.view);
-      // this.enemies.splice(index, 1); // need to rewrite with filter
+      tank.selfDestroy();
+      this.enemies = this.enemies.filter((e) => e !== tank);
     } else {
       this.stage.addChild(
         this.explosion.createAnimation({
-          x: this.tank.view.x,
-          y: this.tank.view.y,
+          x: this.tank.x,
+          y: this.tank.y,
         })
       );
 
@@ -109,15 +107,15 @@ export default class Game {
       const temp = new Score({
         fz: 50,
         initial: 'GAME OVER',
-      }).view;
+      });
       temp.align = 'center';
 
       this.stage.addChild(temp);
       this.enemies.forEach((enemy) => {
         this.stage.addChild(
           this.explosion.createAnimation({
-            x: enemy.view.x,
-            y: enemy.view.y,
+            x: enemy.x,
+            y: enemy.y,
           })
         );
         enemy.selfDestroy();
@@ -127,67 +125,13 @@ export default class Game {
     }
   };
 
-  checkEnemyCollision() {
-    if (this.enemies.length) {
-      for (let index = 0; index < this.enemies.length; index++) {
-        if (this.tank.bullets.length) {
-          for (let bullIdx = 0; bullIdx < this.tank.bullets.length; bullIdx++) {
-            if (
-              isCollision(
-                this.enemies[index].view,
-                this.tank.bullets[bullIdx].sprite
-              )
-            ) {
-              return this.destroyTank(this.enemies[index], index);
-            }
-          }
-        }
-        if (this.enemies[index].bullets.length) {
-          for (
-            let enemyBulletIdx = 0;
-            enemyBulletIdx < this.enemies[index].bullets.length;
-            enemyBulletIdx++
-          ) {
-            if (
-              isCollision(
-                this.enemies[index].bullets[enemyBulletIdx].sprite,
-                this.tank.view
-              )
-            ) {
-              return this.destroyTank(this.tank, -1);
-            }
-          }
-        }
-
-        if (this.tank) {
-          if (isCollision(this.enemies[index].view, this.tank.view)) {
-            // if (this.tank.isMoving && this.enemies.length) { ?????
-            // if (this.tank.isMoving) {
-            //   if (isCollision(this.enemies[index].view, this.tank.view)) {
-            //     this.destroyEnemy(this.enemies[index], index); // Destoy if collide with enemy
-            //   }
-            // }
-
-            this.enemies[index].isMoving = false;
-          }
-        }
-
-        this.enemies[index].update();
-      }
-    }
-  }
-
   addEnemy = (amount = 1) => {
     for (let index = 1; index <= amount; index++) {
       const enemey = new Enemy({ ...this.defaultTankProperties, speed: 0.5 });
       this.enemies.push(enemey);
-      this.stage.addChild(enemey.view);
+      this.stage.addChild(enemey);
     }
   };
-
-  clearGrid() {
-    this.grid.clear();
-  }
 
   addToGrid(obj) {
     const startX = Math.floor(obj.x / this.gridSize);
@@ -215,20 +159,29 @@ export default class Game {
 
           const neighborObjects = this.grid.get(neighborKey);
 
-          // Проверяем столкновения между объектами
           for (let i = 0; i < objects.length; i++) {
             for (let j = 0; j < neighborObjects.length; j++) {
               if (objects[i] !== neighborObjects[j]) {
                 if (isCollision(objects[i], neighborObjects[j])) {
-                  if (
-                    objects[i].type === TYPE.bullets.player &&
-                    neighborObjects[j].type === TYPE.tank.enemy
-                  ) {
-                    return this.destroyTank(neighborObjects[j]);
+                  switch (objects[i].type + neighborObjects[j].type) {
+                    case `${TYPE.bullets.player}${TYPE.tank.enemy}`:
+                      return this.destroyTank(neighborObjects[j]);
+                    case `${TYPE.tank.enemy}${TYPE.bullets.player}`:
+                      return this.destroyTank(objects[i]);
+                    case `${TYPE.tank.player}${TYPE.bullets.enemy}`:
+                    case `${TYPE.bullets.enemy}${TYPE.tank.player}`:
+                      return this.destroyTank(this.tank, -1);
+                    case `${TYPE.tank.enemy}${TYPE.tank.enemy}`:
+                      objects[i].movingDirection = 'drivingLeft';
+                      return (neighborObjects[j].movingDirection =
+                        'drivingRight');
+                    case `${TYPE.tank.enemy}${TYPE.tank.player}`:
+                    case `${TYPE.tank.player}${TYPE.tank.enemy}`:
+                      objects[i].isMoving = false;
+                      neighborObjects[j].isMoving = false;
+                    default:
+                      break;
                   }
-                  console.log(objects[i].type);
-                  // console.log(neighborObjects[j].type);
-                  // return console.log(objects[i]);
                 }
               }
             }
@@ -239,22 +192,22 @@ export default class Game {
   }
 
   updateCollision() {
-    this.clearGrid();
+    this.grid.clear();
     this.enemies.forEach((enemy) => {
-      this.addToGrid(enemy.view);
+      this.addToGrid(enemy);
 
       enemy.update();
       if (enemy.bullets) {
-        enemy.bullets.forEach((bullet) => this.addToGrid(bullet.sprite));
+        enemy.bullets.forEach((bullet) => this.addToGrid(bullet));
       }
     });
 
     if (this.tank) {
       this.tank.bullets.forEach((bullet) => {
-        this.addToGrid(bullet.sprite);
+        this.addToGrid(bullet);
       });
 
-      this.addToGrid(this.tank.view);
+      this.addToGrid(this.tank);
     }
 
     this.checkCollisions();
