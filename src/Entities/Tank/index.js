@@ -1,6 +1,6 @@
 import { Container, Sprite, Point } from 'pixi.js';
 import Bullet from '../Bullet';
-
+import { TYPE } from '../../constants';
 export default class Tank {
   constructor({
     body,
@@ -34,6 +34,8 @@ export default class Tank {
     this.drivingDown = false;
     this.bullets = [];
     this.speed = speed;
+    this._view.type = TYPE.tank.player;
+    this.bulletType = TYPE.bullets.player;
     this.rotationSpeed = rotationSpeed;
   }
 
@@ -56,7 +58,11 @@ export default class Tank {
       new Point(0, this._barrel.height)
     );
 
-    const bullet = new Bullet(this.bulletTexture, this._view.rotation);
+    const bullet = new Bullet(
+      this.bulletTexture,
+      this._view.rotation,
+      this.bulletType
+    );
     bullet.sprite.x = barrelGlobalPosition.x;
     bullet.sprite.y = barrelGlobalPosition.y;
     this._view.parent.addChild(bullet.sprite);

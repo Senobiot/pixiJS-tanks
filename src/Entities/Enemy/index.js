@@ -1,9 +1,12 @@
 import { Point } from 'pixi.js';
 import Tank from '../Tank';
+import { TYPE } from '../../constants';
 
 export default class Enemy extends Tank {
   constructor(...args) {
     super(...args);
+    this._view.type = TYPE.tank.enemy;
+    this.bulletType = TYPE.bullets.enemy;
     this.initialPosition();
     // this.setRandomDirection();
     this.changeDirectionInterval = 2000;

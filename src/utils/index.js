@@ -1,6 +1,17 @@
-export const addKeyboardListener = (type, handler, param) => {
-  document.addEventListener(type, (event) => handler(event, param));
+export const addKeyboardListener = (type, handler, context) => {
+  if (!context._listeners) {
+    context._listeners = {};
+  }
+  context._listeners[type] = (event) => handler(event, context);
+  document.addEventListener(type, context._listeners[type]);
 };
+
+export const removeKeyboardListener = (type, context) => {
+  document.removeEventListener(type, context._listeners[type]);
+  context._listeners[type] = null;
+};
+
+export const startGame = (type, handler, context) => {};
 
 const keyToProperty = {
   ArrowLeft: 'drivingLeft',
@@ -35,7 +46,7 @@ export const keyUpHandler = (event, game) => {
 };
 
 export const isCollision = (s1, s2) => {
-  if (!s1 || !s2) return;
+  if (!s1 || !s2) return false;
 
   const b1 = s1.getBounds();
   const b2 = s2.getBounds();
