@@ -1,22 +1,23 @@
-import { Sprite, Texture, Rectangle } from 'pixi.js';
+import { Sprite, Texture, Rectangle, Assets } from 'pixi.js';
 import groundData from '../../data/ground-tile-map.json';
 
-const createGroundTextures = (
+const createGroundTextures = async (
   stage,
-  spritesheet,
   options = { tilesInRow: 10, tilesQuantity: 40, tileSize: 64 }
 ) => {
   const { data, width } = groundData.layers[0];
   const { tilesInRow, tilesQuantity, tileSize } = options;
   const textures = [];
+  const ground = await Assets.load('ground-sheet');
 
   for (let i = 0; i < tilesQuantity; i++) {
     const x = (i % tilesInRow) * tileSize;
     const y = Math.floor(i / tilesInRow) * tileSize;
     const frame = new Rectangle(x, y, tileSize, tileSize);
+
     textures.push(
       new Texture({
-        source: spritesheet.source,
+        source: ground.source,
         frame,
       })
     );

@@ -1,31 +1,21 @@
-import { Container, Sprite, Point } from 'pixi.js';
+import { Container, Sprite, Point, Assets } from 'pixi.js';
 import Bullet from '../Bullet';
-import { TYPE } from '../../constants';
+import { TYPE, ASSETS_COLORS } from '../../constants';
 export default class Tank extends Container {
   constructor({
-    body,
-    barrel,
-    bullet,
-    position,
     stageDimensions,
     speed = 1,
     rotationSpeed = 0.05,
+    position = { x: 50, y: 150 },
+    color,
   }) {
     super();
+    this.loadAssets(color);
     this.x = position.x;
     this.y = position.y;
 
-    this.body = new Sprite(body.texture);
-    this.body.anchor.set(0.5);
-    this.addChild(this.body);
-
-    this.barrel = new Sprite(barrel.texture);
-    this.barrel.anchor.set(0.5, 0);
-
-    this.addChild(this.barrel);
     this.stageWidth = stageDimensions.width;
     this.stageHeight = stageDimensions.height;
-    this.bulletTexture = bullet.texture;
     this.isMoving = false;
     this.movingDirection = null;
     this.drivingLeft = false;
@@ -37,6 +27,7 @@ export default class Tank extends Container {
     this.type = TYPE.tank.player;
     this.bulletType = TYPE.bullets.player;
     this.rotationSpeed = rotationSpeed;
+    this.color = color;
   }
 
   shoot = () => {
@@ -45,12 +36,7 @@ export default class Tank extends Container {
       new Point(0, this.barrel.height)
     );
 
-    const bullet = new Bullet(
-      this.bulletTexture,
-      this.rotation,
-      this.bulletType
-    );
-
+    const bullet = new Bullet(this.rotation, this.bulletType, this.color);
     bullet.x = barrelGlobalPosition.x;
     bullet.y = barrelGlobalPosition.y;
     this.parent.addChild(bullet); // для привязки пули к сцене а не танку
@@ -134,5 +120,26 @@ export default class Tank extends Container {
       this.bullets = [];
     }
     this.destroy();
+  }
+
+  async loadAssets(color = ASSETS_COLORS.red) {
+    await Assets.loadBundle(`tank-${color}`);
+
+    const bodyTexture = Assets.get(`body-${color}`);
+    const barrelTexture = Assets.get(`barrel-${color}`);
+
+    if (!bodyTexture || !barrelTexture) {
+      console.error('no such textures');
+      return;
+    }
+
+    this.body = new Sprite(bodyTexture);
+    this.barrel = new Sprite(barrelTexture);
+
+    this.body.anchor.set(0.5);
+    this.barrel.anchor.set(0.5, 0);
+
+    this.addChild(this.body);
+    this.addChild(this.barrel);
   }
 }

@@ -1,19 +1,31 @@
-import { Sprite } from 'pixi.js';
+import { Sprite, Texture, Assets } from 'pixi.js';
+import { ASSETS_COLORS } from '../../constants';
 
 export default class Bullet extends Sprite {
   _speed = 3;
 
-  constructor(texture, direction, type) {
-    super(texture);
+  constructor(direction, type, color) {
+    super(Texture.EMPTY);
     this.x = 0;
     this.y = 0;
     this.direction = direction;
     this.rotation = direction;
     this.type = type;
+    this.loadAssets(color);
   }
 
   update = () => {
     this.x -= Math.sin(this.direction) * this._speed;
     this.y += Math.cos(this.direction) * this._speed;
   };
+
+  async loadAssets(color = ASSETS_COLORS.red) {
+    await Assets.loadBundle(`bullets`);
+    const bulletTexture = Assets.get(`bullet-${color}`);
+
+    if (!bulletTexture) {
+      console.error('no such textures');
+    }
+    this.texture = bulletTexture;
+  }
 }

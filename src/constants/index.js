@@ -8,3 +8,11 @@ export const TYPE = {
     enemy: 'enemyTank',
   },
 };
+
+export const ASSETS_COLORS = {
+  red: 'red',
+  green: 'green',
+  sand: 'sand',
+  dark: 'dark',
+  blue: 'blue',
+};
