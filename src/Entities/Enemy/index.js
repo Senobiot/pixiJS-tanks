@@ -11,7 +11,6 @@ export default class Enemy extends Tank {
     this.changeDirectionInterval = 2000;
     this.intervalId = null;
     this.startPosition = startPosition;
-    console.log(startPosition);
     this.initialPosition();
   }
 
@@ -64,9 +63,6 @@ export default class Enemy extends Tank {
       return;
     }
 
-    // if (this.isNearBorder) {
-    //   direction = -initialDirection;
-    // }
     this.isMoving = true;
 
     if (axis === 'X') {
@@ -82,13 +78,7 @@ export default class Enemy extends Tank {
 
   selfDestroy = () => {
     super.selfDestroy();
-    console.log('clearIntervals');
     clearInterval(this.intervalId);
     this.intervalId = null;
   };
-
-  // update = () => {
-  //   this.updateBullets();
-  //   this.movingBehavior();
-  // };
 }

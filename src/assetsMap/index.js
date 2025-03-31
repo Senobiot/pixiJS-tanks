@@ -103,5 +103,22 @@ export const manifest = {
         },
       ],
     },
+    {
+      name: 'tank-mammoth',
+      assets: [
+        {
+          alias: 'body-mammoth',
+          src: '/assets/tankBody_huge_outline.png',
+        },
+        {
+          alias: 'barrel-mammoth-1',
+          src: '/assets/specialBarrel4_outline.png',
+        },
+        {
+          alias: 'barrel-mammoth-2',
+          src: '/assets/specialBarrel1_outline.png',
+        },
+      ],
+    },
   ],
 };

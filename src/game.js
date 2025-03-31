@@ -23,6 +23,7 @@ import Score from './Entities/Score';
 import TitleText from './Entities/Title';
 import { ASSETS_COLORS, TYPE } from './constants';
 import EnemyIndicator from './Entities/UI/EnemyIndicator';
+import Mammoth from './Entities/Enemy/Boss';
 
 export default class Game {
   constructor(app) {
@@ -48,7 +49,7 @@ export default class Game {
     });
 
     this.enemies = [];
-
+    this.isBossFight = false;
     this.currentScore = 0;
     this.gameOverText = null;
     this.start();
@@ -126,7 +127,11 @@ export default class Game {
       this.scoreMeter.score = this.currentScore;
       tank.selfDestroy();
       this.enemies = this.enemies.filter((e) => e !== tank);
-      if (!this.enemies.length) {
+      if (!this.enemies.length && !this.isBossFight) {
+        this.isBossFight = true;
+        this.addEnemyBoss();
+      } else if (!this.enemies.length && this.isBossFight) {
+        this.isBossFight = false;
         setTimeout(() => alert('You WIN!'), 1000);
       }
     } else {
@@ -168,6 +173,14 @@ export default class Game {
       this.enemies.push(enemy);
       this.stage.addChild(enemy);
     }
+  };
+
+  addEnemyBoss = () => {
+    const enemy = new Mammoth({
+      ...this.defaultTankProperties,
+    });
+    this.enemies.push(enemy);
+    this.stage.addChild(enemy);
   };
 
   addToGrid(obj) {
