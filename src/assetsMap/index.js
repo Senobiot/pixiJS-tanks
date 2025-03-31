@@ -94,5 +94,14 @@ export const manifest = {
         },
       ],
     },
+    {
+      name: 'indicator',
+      assets: [
+        {
+          alias: 'enemy-amount',
+          src: '/assets/enemy_indicator.png',
+        },
+      ],
+    },
   ],
 };

@@ -1,6 +1,7 @@
 import { Point } from 'pixi.js';
 import Tank from '../Tank';
 import { TYPE } from '../../constants';
+import { getRandomNumber } from '../../utils';
 
 export default class Enemy extends Tank {
   constructor({ startPosition, ...rest }) {
@@ -10,7 +11,7 @@ export default class Enemy extends Tank {
     this.changeDirectionInterval = 2000;
     this.intervalId = null;
     this.startPosition = startPosition;
-
+    console.log(startPosition);
     this.initialPosition();
   }
 
@@ -22,16 +23,14 @@ export default class Enemy extends Tank {
       new Point((this.stageWidth / 4) * 3, this.stageHeight + this.height / 2),
     ];
 
-    const randomPosition =
-      this.startPosition ||
-      Math.floor(Math.random() * possibleStartPositions.length);
+    const randomPosition = this.startPosition || getRandomNumber(1, 4);
 
-    const initialPosition = possibleStartPositions[randomPosition];
+    const initialPosition = possibleStartPositions[randomPosition - 1];
 
     console.log(`enemy Initial position ${initialPosition}`);
     this.x = initialPosition.x;
     this.y = initialPosition.y;
-    this.movingDirection = randomPosition > 1 ? 'drivingUp' : 'drivingDown';
+    this.movingDirection = randomPosition > 2 ? 'drivingUp' : 'drivingDown';
     this.isMoving = true;
     this.initialMovement = true;
 
