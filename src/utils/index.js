@@ -14,7 +14,7 @@ export const removeKeyboardListener = (type, context) => {
   context._listeners[type] = null;
 };
 
-const keyToProperty = {
+export const keyToProperty = {
   ArrowLeft: 'drivingLeft',
   ArrowRight: 'drivingRight',
   ArrowUp: 'drivingUp',

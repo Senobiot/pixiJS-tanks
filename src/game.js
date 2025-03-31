@@ -7,6 +7,13 @@ import {
   menuControls,
   removeKeyboardListener,
 } from './utils';
+import {
+  addGameListener,
+  canvasContextMenu,
+  canvasMouseDown,
+  canvasMouseMove,
+  canvasMouseUp,
+ } from './utils/mouse-control';
 import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
@@ -16,6 +23,7 @@ import { TYPE } from './constants';
 
 export default class Game {
   constructor(app, ground, bullet, tankAssets) {
+    this.app = app;
     this.stage = app.stage;
     createGroundTextures(this.stage, ground);
 
@@ -68,6 +76,10 @@ export default class Game {
     removeKeyboardListener('keydown', this);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
+    addGameListener('contextmenu', canvasContextMenu, this);
+    addGameListener('mousedown', canvasMouseDown, this);
+    addGameListener('mouseup', canvasMouseUp, this);
+    addGameListener('mousemove', canvasMouseMove, this);
   };
 
   gameOver = () => {
@@ -81,8 +93,14 @@ export default class Game {
     this.stage.addChild(this.gameOverText);
     removeKeyboardListener('keydown', this);
     removeKeyboardListener('keyup', this);
+    removeGameListener('contextmenu', this);
+    removeGameListener('mousedown', this);
+    removeGameListener('mouseup', this);
+    removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
   };
+
+
 
   update = () => {
     if (this.tank) {
@@ -228,4 +246,12 @@ export default class Game {
 
     this.checkCollisions();
   }
+
+  getTankCoordinates = () => {
+    if (!this.tank) return null;
+    return {
+      x: this.tank.x,
+      y: this.tank.y,
+    };
+  };
 }
