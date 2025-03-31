@@ -14,9 +14,9 @@ import Game from './game';
 
   const ground = await Assets.load('/assets/terrainTiles.png'); // load ground map
   const bullet = await Assets.load('/assets/bulletRed3.png');
-  const tankAssets = await Assets.loadBundle('tank-red');
+  // const tankAssets = await Assets.loadBundle('tank-red');
 
-  const game = new Game(app, ground, bullet, tankAssets);
+  const game = new Game(app, ground, bullet);
   app.ticker.add(game.update, game);
 
   document.getElementById('pixi-container').appendChild(app.canvas);

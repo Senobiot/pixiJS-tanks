@@ -5,6 +5,7 @@ import {
   keyDownHandler,
   keyUpHandler,
   menuControls,
+  getRandomNumber,
   removeKeyboardListener,
 } from './utils';
 import {
@@ -14,49 +15,32 @@ import {
   canvasMouseMove,
   canvasMouseUp,
   removeGameListener,
- } from './utils/mouse-control';
+} from './utils/mouse-control';
 import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
 import Score from './Entities/Score';
 import TitleText from './Entities/Title';
-import { TYPE } from './constants';
+import { ASSETS_COLORS, TYPE } from './constants';
 
 export default class Game {
-  constructor(app, ground, bullet, tankAssets) {
+  constructor(app, ground) {
     this.app = app;
     this.stage = app.stage;
     createGroundTextures(this.stage, ground);
-
     this.defaultTankProperties = {
-      position: {
-        x: app.screen.width * 0.25,
-        y: app.screen.height / 2,
-      },
-      body: {
-        texture: tankAssets.bodyRed,
-      },
-      barrel: {
-        texture: tankAssets.barrel,
-      },
-      bullet: {
-        texture: bullet,
-      },
-      stageDimensions: {
-        width: app.stage.width,
-        height: app.stage.height,
-      },
+      stageDimensions: this.stage.getBounds(),
     };
 
     this.gridSize = 100;
     this.grid = new Map();
-
+    this.scoreMeter = new Score();
     this.explosion = new ExplosionFabric();
     this.tank = new Tank(this.defaultTankProperties);
+
     this.initalEnemyAmount = 2;
     this.enemies = [];
-    this.stage.addChild(this.tank);
-    this.scoreMeter = new Score();
+
     this.currentScore = 0;
     this.gameOverText = null;
     this.start();
@@ -64,14 +48,15 @@ export default class Game {
 
   start = () => {
     this.addEnemy(this.initalEnemyAmount);
+
     if (this.gameOverText) {
       // сделать разделение на инициализацию и перезапуск
       this.currentScore = 0;
       this.scoreMeter.score = 0;
       this.stage.removeChild(this.gameOverText);
       this.tank = new Tank(this.defaultTankProperties);
-      this.stage.addChild(this.tank);
     }
+    this.stage.addChild(this.tank);
     this.stage.addChild(this.scoreMeter);
 
     removeKeyboardListener('keydown', this);
@@ -100,8 +85,6 @@ export default class Game {
     removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
   };
-
-
 
   update = () => {
     if (this.tank) {
@@ -156,15 +139,17 @@ export default class Game {
   };
 
   addEnemy = (amount = 1) => {
+    const color = Object.keys(ASSETS_COLORS)[getRandomNumber(1, 4)];
     // if amount > 4 tanks will stack at initial positions cause only 4 spawn points
     for (let index = 1; index <= amount; index++) {
-      const enemey = new Enemy({
+      const enemy = new Enemy({
         ...this.defaultTankProperties,
         speed: 0.5,
         startPosition: index,
+        color,
       });
-      this.enemies.push(enemey);
-      this.stage.addChild(enemey);
+      this.enemies.push(enemy);
+      this.stage.addChild(enemy);
     }
   };
 

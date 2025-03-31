@@ -65,3 +65,7 @@ export const isCollision = (s1, s2) => {
     b1.y + b1.height > b2.y
   );
 };
+
+export const getRandomNumber = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
