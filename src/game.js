@@ -13,6 +13,7 @@ import {
   canvasMouseDown,
   canvasMouseMove,
   canvasMouseUp,
+  removeGameListener,
  } from './utils/mouse-control';
 import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
