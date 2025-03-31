@@ -9,9 +9,17 @@ import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
 import Score from './Entities/Score';
+import {
+  addGameListener,
+  canvasContextMenu,
+  canvasMouseDown,
+  canvasMouseMove,
+  canvasMouseUp,
+ } from './utils/mouse-control';
 
 export default class Game {
   constructor(app, ground, bullet, tankAssets) {
+    this.app = app;
     this.stage = app.stage;
     createGroundTextures(this.stage, ground);
 
@@ -46,6 +54,10 @@ export default class Game {
     this.stage.addChild(this.scoreMeter.view);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
+    addGameListener('contextmenu', canvasContextMenu, this);
+    addGameListener('mousedown', canvasMouseDown, this);
+    addGameListener('mouseup', canvasMouseUp, this);
+    addGameListener('mousemove', canvasMouseMove, this);
     this.addEnemy(this.initalEnemyAmount);
   }
 
@@ -143,5 +155,13 @@ export default class Game {
       this.enemies.push(enemey);
       this.stage.addChild(enemey.view);
     }
+  };
+
+  getTankCoordinates = () => {
+    if (!this.tank) return null;
+    return {
+      x: this.tank.view.x,
+      y: this.tank.view.y,
+    };
   };
 }

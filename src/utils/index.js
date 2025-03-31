@@ -2,7 +2,7 @@ export const addKeyboardListener = (type, handler, param) => {
   document.addEventListener(type, (event) => handler(event, param));
 };
 
-const keyToProperty = {
+export const keyToProperty = {
   ArrowLeft: 'drivingLeft',
   ArrowRight: 'drivingRight',
   ArrowUp: 'drivingUp',
