@@ -3,8 +3,20 @@ import { keyToProperty } from ".";
 let isRightBtnPress = false;
 let direction = null;
 
-export const addGameListener = (type, handler, param) => {
-  param.app.canvas.addEventListener(type, (e) => handler(e, param));
+export const addGameListener = (type, handler, context) => {
+  if (!context._listeners) {
+    context._listeners = {};
+  }
+  context._listeners[type] = (event) => handler(event, context);
+  context.app.canvas.addEventListener(type, context._listeners[type]);
+};
+
+export const removeGameListener = (type, context) => {
+  if (!context._listeners) {
+    return;
+  }
+  context.app.canvas.removeEventListener(type, context._listeners[type]);
+  context._listeners[type] = null;
 };
 
 export const canvasContextMenu = (e, game) => {

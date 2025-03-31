@@ -1,38 +1,44 @@
 import { Point } from 'pixi.js';
 import Tank from '../Tank';
+import { TYPE } from '../../constants';
 
 export default class Enemy extends Tank {
-  constructor(...args) {
-    super(...args);
-    this.initialPosition();
-    // this.setRandomDirection();
+  constructor({ startPosition, ...rest }) {
+    super({ ...rest });
+    this.type = TYPE.tank.enemy;
+    this.bulletType = TYPE.bullets.enemy;
     this.changeDirectionInterval = 2000;
-    this.intervalId = setInterval(
-      () => this.setRandomDirection(),
-      this.changeDirectionInterval
-    );
+    this.intervalId = null;
+    this.startPosition = startPosition;
+
+    this.initialPosition();
   }
 
   initialPosition() {
     const possibleStartPositions = [
-      new Point(this.stageWidth / 4, this.view.height / 2),
-      new Point((this.stageWidth / 4) * 3, this.view.height / 2),
-      new Point(this.stageWidth / 4, this.stageHeight - this.view.height / 2),
-      new Point(
-        (this.stageWidth / 4) * 3,
-        this.stageHeight - this.view.height / 2
-      ),
+      new Point(this.stageWidth / 4, -this.height / 2),
+      new Point((this.stageWidth / 4) * 3, -this.height / 2),
+      new Point(this.stageWidth / 4, this.stageHeight + this.height / 2),
+      new Point((this.stageWidth / 4) * 3, this.stageHeight + this.height / 2),
     ];
 
-    const initialPosition =
-      possibleStartPositions[
-        Math.floor(Math.random() * possibleStartPositions.length)
-      ];
-    console.log(
-      `enemy Initial position ${(initialPosition.x, initialPosition.y)}`
-    );
-    this._view.x = initialPosition.x;
-    this._view.y = initialPosition.y;
+    const randomPosition =
+      this.startPosition ||
+      Math.floor(Math.random() * possibleStartPositions.length);
+
+    const initialPosition = possibleStartPositions[randomPosition];
+
+    console.log(`enemy Initial position ${initialPosition}`);
+    this.x = initialPosition.x;
+    this.y = initialPosition.y;
+    this.movingDirection = randomPosition > 1 ? 'drivingUp' : 'drivingDown';
+    this.isMoving = true;
+    this.initialMovement = true;
+
+    this.intervalId = setInterval(() => {
+      this.initialMovement = false;
+      this.setRandomDirection();
+    }, this.changeDirectionInterval);
   }
 
   setRandomDirection = () => {
@@ -55,14 +61,13 @@ export default class Enemy extends Tank {
     let direction = initialDirection;
 
     if (direction === 0) {
-      console.log('direction === 0');
       this.isMoving = false;
       return;
     }
 
-    if (this.isNearBorder) {
-      direction = -initialDirection;
-    }
+    // if (this.isNearBorder) {
+    //   direction = -initialDirection;
+    // }
     this.isMoving = true;
 
     if (axis === 'X') {
@@ -78,7 +83,9 @@ export default class Enemy extends Tank {
 
   selfDestroy = () => {
     super.selfDestroy();
+    console.log('clearIntervals');
     clearInterval(this.intervalId);
+    this.intervalId = null;
   };
 
   // update = () => {
