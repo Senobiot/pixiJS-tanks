@@ -22,14 +22,16 @@ import ExplosionFabric from './Entities/Explosion';
 import Score from './Entities/Score';
 import TitleText from './Entities/Title';
 import { ASSETS_COLORS, TYPE } from './constants';
+import EnemyIndicator from './Entities/UI/EnemyIndicator';
 
 export default class Game {
   constructor(app) {
     this.app = app;
     this.stage = app.stage;
+    this.stageDimensions = this.stage.getBounds();
 
     this.defaultTankProperties = {
-      stageDimensions: this.stage.getBounds(),
+      stageDimensions: this.stageDimensions,
     };
 
     this.gridSize = 100;
@@ -37,8 +39,14 @@ export default class Game {
     this.scoreMeter = new Score();
     this.explosion = new ExplosionFabric();
     this.tank = new Tank(this.defaultTankProperties);
+    this.initalEnemyAmount = 4;
+    this.enemyAmount = 8;
+    this.enemyIndicator = new EnemyIndicator({
+      amount: this.enemyAmount,
+      x: this.stageDimensions.width,
+      alignRight: true,
+    });
 
-    this.initalEnemyAmount = 2;
     this.enemies = [];
 
     this.currentScore = 0;
@@ -48,7 +56,6 @@ export default class Game {
 
   start = () => {
     this.addEnemy(this.initalEnemyAmount);
-
     if (this.gameOverText) {
       // сделать разделение на инициализацию и перезапуск
       this.currentScore = 0;
@@ -56,6 +63,7 @@ export default class Game {
       this.stage.removeChild(this.gameOverText);
       this.tank = new Tank(this.defaultTankProperties);
     }
+    this.stage.addChild(this.enemyIndicator);
     this.stage.addChild(this.tank);
     this.stage.addChild(this.scoreMeter);
 
@@ -108,10 +116,19 @@ export default class Game {
     this.stage.addChild(explosion);
 
     if (index !== -1) {
+      if (this.enemies.length < 4 && this.enemyAmount > 0) {
+        this.enemyAmount--;
+        this.addEnemy();
+        this.enemyIndicator.update();
+      }
+
       this.currentScore += 100;
       this.scoreMeter.score = this.currentScore;
       tank.selfDestroy();
       this.enemies = this.enemies.filter((e) => e !== tank);
+      if (!this.enemies.length) {
+        setTimeout(() => alert('You WIN!'), 1000);
+      }
     } else {
       this.stage.addChild(
         this.explosion.createAnimation({
@@ -139,13 +156,13 @@ export default class Game {
   };
 
   addEnemy = (amount = 1) => {
-    const color = Object.keys(ASSETS_COLORS)[getRandomNumber(1, 4)];
     // if amount > 4 tanks will stack at initial positions cause only 4 spawn points
     for (let index = 1; index <= amount; index++) {
+      const color = Object.keys(ASSETS_COLORS)[getRandomNumber(0, 4)];
       const enemy = new Enemy({
         ...this.defaultTankProperties,
         speed: 0.5,
-        startPosition: index,
+        startPosition: amount > 1 ? index : null,
         color,
       });
       this.enemies.push(enemy);
