@@ -1,12 +1,3 @@
-export const assetsMap = {
-  name: 'tank',
-  assets: [
-    { alias: 'bodyRed', src: '/assets/tankBody_red_outline.png' },
-    { alias: 'barrel1', src: '/assets/tankRed_barrel1_outline.png' },
-    { alias: 'tracks', src: '/assets/tracksLarge.png' },
-  ],
-};
-
 export const manifest = {
   bundles: [
     {
@@ -92,6 +83,15 @@ export const manifest = {
         { alias: 'bullet-sand', src: '/assets/bulletSand3.png' },
         { alias: 'bullet-dark', src: '/assets/bulletDark3.png' },
         { alias: 'bullet-blue', src: '/assets/bulletBlue3.png' },
+      ],
+    },
+    {
+      name: 'ground',
+      assets: [
+        {
+          alias: 'ground-sheet',
+          src: '/assets/terrainTiles.png',
+        },
       ],
     },
   ],

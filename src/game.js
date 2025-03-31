@@ -24,10 +24,10 @@ import TitleText from './Entities/Title';
 import { ASSETS_COLORS, TYPE } from './constants';
 
 export default class Game {
-  constructor(app, ground) {
+  constructor(app) {
     this.app = app;
     this.stage = app.stage;
-    createGroundTextures(this.stage, ground);
+
     this.defaultTankProperties = {
       stageDimensions: this.stage.getBounds(),
     };
