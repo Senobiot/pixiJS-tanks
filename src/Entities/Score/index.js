@@ -6,6 +6,7 @@ export default class Score extends BitmapText {
       fontName: 'Arial',
       fontSize: fz,
     });
+    this.tint = 0xff0000;
     this.x = x;
     this.y = y;
     this.colors = {

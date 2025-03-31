@@ -3,36 +3,42 @@ import Tank from '../Tank';
 import { TYPE } from '../../constants';
 
 export default class Enemy extends Tank {
-  constructor(...args) {
-    super(...args);
+  constructor({ startPosition, ...rest }) {
+    super({ ...rest });
     this.type = TYPE.tank.enemy;
     this.bulletType = TYPE.bullets.enemy;
-    this.initialPosition();
-    // this.setRandomDirection();
     this.changeDirectionInterval = 2000;
-    this.intervalId = setInterval(
-      () => this.setRandomDirection(),
-      this.changeDirectionInterval
-    );
+    this.intervalId = null;
+    this.startPosition = startPosition;
+
+    this.initialPosition();
   }
 
   initialPosition() {
     const possibleStartPositions = [
-      new Point(this.stageWidth / 4, this.height / 2),
-      new Point((this.stageWidth / 4) * 3, this.height / 2),
-      new Point(this.stageWidth / 4, this.stageHeight - this.height / 2),
-      new Point((this.stageWidth / 4) * 3, this.stageHeight - this.height / 2),
+      new Point(this.stageWidth / 4, -this.height / 2),
+      new Point((this.stageWidth / 4) * 3, -this.height / 2),
+      new Point(this.stageWidth / 4, this.stageHeight + this.height / 2),
+      new Point((this.stageWidth / 4) * 3, this.stageHeight + this.height / 2),
     ];
 
-    const initialPosition =
-      possibleStartPositions[
-        Math.floor(Math.random() * possibleStartPositions.length)
-      ];
-    console.log(
-      `enemy Initial position ${(initialPosition.x, initialPosition.y)}`
-    );
+    const randomPosition =
+      this.startPosition ||
+      Math.floor(Math.random() * possibleStartPositions.length);
+
+    const initialPosition = possibleStartPositions[randomPosition];
+
+    console.log(`enemy Initial position ${initialPosition}`);
     this.x = initialPosition.x;
     this.y = initialPosition.y;
+    this.movingDirection = randomPosition > 1 ? 'drivingUp' : 'drivingDown';
+    this.isMoving = true;
+    this.initialMovement = true;
+
+    this.intervalId = setInterval(() => {
+      this.initialMovement = false;
+      this.setRandomDirection();
+    }, this.changeDirectionInterval);
   }
 
   setRandomDirection = () => {
@@ -43,28 +49,25 @@ export default class Enemy extends Tank {
     if (isHorizontal) {
       this.directionX = Math.floor(Math.random() * 3) - 1; // -1: left | 0: isMoving = false, 1: right
       this.directionY = 0;
-      console.log(this.directionX);
       this.updateMovementState('X', this.directionX);
     } else {
       this.directionY = Math.floor(Math.random() * 3) - 1; // 1: up | 0: stay | 1: down
       this.directionX = 0;
-      console.log(this.directionY);
       this.updateMovementState('Y', this.directionY);
     }
   };
 
   updateMovementState = (axis, initialDirection) => {
     let direction = initialDirection;
-    console.log('');
+
     if (direction === 0) {
-      console.log('direction === 0');
       this.isMoving = false;
       return;
     }
 
-    if (this.isNearBorder) {
-      direction = -initialDirection;
-    }
+    // if (this.isNearBorder) {
+    //   direction = -initialDirection;
+    // }
     this.isMoving = true;
 
     if (axis === 'X') {
@@ -80,7 +83,9 @@ export default class Enemy extends Tank {
 
   selfDestroy = () => {
     super.selfDestroy();
+    console.log('clearIntervals');
     clearInterval(this.intervalId);
+    this.intervalId = null;
   };
 
   // update = () => {
