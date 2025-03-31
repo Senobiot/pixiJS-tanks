@@ -7,11 +7,12 @@ export const addKeyboardListener = (type, handler, context) => {
 };
 
 export const removeKeyboardListener = (type, context) => {
+  if (!context._listeners) {
+    return;
+  }
   document.removeEventListener(type, context._listeners[type]);
   context._listeners[type] = null;
 };
-
-export const startGame = (type, handler, context) => {};
 
 const keyToProperty = {
   ArrowLeft: 'drivingLeft',
@@ -32,6 +33,12 @@ export const keyDownHandler = (event, game) => {
 
   if (event.key === '`') {
     game.addEnemy();
+  }
+};
+
+export const menuControls = (event, game) => {
+  if (event.key === 'Enter') {
+    game.start();
   }
 };
 

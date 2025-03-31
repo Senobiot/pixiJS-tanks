@@ -93,9 +93,11 @@ export default class Tank extends Container {
       ) {
         this.x = newX;
         this.y = newY;
-        this.isNearBorder = false;
       } else {
-        this.isNearBorder = true;
+        if (this.initialMovement) {
+          this.x = newX;
+          this.y = newY;
+        }
       }
     }
   };
