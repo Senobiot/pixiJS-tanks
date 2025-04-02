@@ -1,15 +1,14 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
 
-export default tseslint.config(
-  { ignores: ["dist"] },
+export default [
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{ts,tsx}"],
+    ignores: ['dist'],
+    files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
+    ...js.configs.recommended,
     rules: {},
   },
-);
+];

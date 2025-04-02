@@ -181,6 +181,7 @@ export default class Game {
     });
     this.enemies.push(enemy);
     this.stage.addChild(enemy);
+    this.bossArmor = 5;
   };
 
   addToGrid(obj) {
@@ -213,25 +214,10 @@ export default class Game {
             for (let j = 0; j < neighborObjects.length; j++) {
               if (objects[i] !== neighborObjects[j]) {
                 if (isCollision(objects[i], neighborObjects[j])) {
-                  switch (objects[i].type + neighborObjects[j].type) {
-                    case `${TYPE.bullets.player}${TYPE.tank.enemy}`:
-                      return this.destroyTank(neighborObjects[j]);
-                    case `${TYPE.tank.enemy}${TYPE.bullets.player}`:
-                      return this.destroyTank(objects[i]);
-                    case `${TYPE.tank.player}${TYPE.bullets.enemy}`:
-                    case `${TYPE.bullets.enemy}${TYPE.tank.player}`:
-                      return this.destroyTank(this.tank, -1);
-                    case `${TYPE.tank.enemy}${TYPE.tank.enemy}`:
-                      objects[i].movingDirection = 'drivingLeft';
-                      return (neighborObjects[j].movingDirection =
-                        'drivingRight');
-                    case `${TYPE.tank.enemy}${TYPE.tank.player}`:
-                    case `${TYPE.tank.player}${TYPE.tank.enemy}`:
-                      objects[i].isMoving = false;
-                      neighborObjects[j].isMoving = false;
-                    default:
-                      break;
-                  }
+                  return this.setCollisionAction(
+                    objects[i],
+                    neighborObjects[j]
+                  );
                 }
               }
             }
@@ -269,5 +255,32 @@ export default class Game {
       x: this.tank.x,
       y: this.tank.y,
     };
+  };
+
+  setCollisionAction = (obj1, obj2) => {
+    switch (obj1.type + obj2.type) {
+      case `${TYPE.bullets.player}${TYPE.tank.enemy}`:
+        console.log('---- never  collide ??? ----');
+        return this.destroyTank(obj2);
+      case `${TYPE.tank.enemy}${TYPE.bullets.player}`:
+        obj2.destroy();
+        this.tank.bullets = this.tank.bullets.filter((e) => e != obj2);
+        if (this.isBossFight && this.bossArmor) {
+          return this.bossArmor--;
+        }
+        return this.destroyTank(obj1);
+      case `${TYPE.tank.player}${TYPE.bullets.enemy}`:
+      case `${TYPE.bullets.enemy}${TYPE.tank.player}`:
+        return this.destroyTank(this.tank, -1);
+      case `${TYPE.tank.enemy}${TYPE.tank.enemy}`:
+        obj1.movingDirection = 'drivingLeft';
+        return (obj2.movingDirection = 'drivingRight');
+      case `${TYPE.tank.enemy}${TYPE.tank.player}`:
+      case `${TYPE.tank.player}${TYPE.tank.enemy}`:
+        obj1.isMoving = false;
+        obj2.isMoving = false;
+      default:
+        break;
+    }
   };
 }
