@@ -1,4 +1,4 @@
-import { Assets, Point, Sprite } from 'pixi.js';
+import { Assets, Point, Sprite, Graphics } from 'pixi.js';
 import Enemy from '..';
 import Bullet from '../../Bullet';
 
@@ -57,5 +57,35 @@ export default class Mammoth extends Enemy {
     this.addChild(this.leftBarrel);
     this.addChild(this.rightBarrel);
     this.addChild(this.topBarrel);
+  }
+
+  updateExplosion = () => {
+    if (!this.explosion) {
+      this.explosion = new Graphics();
+      this.addChild(this.explosion);
+      this.explosionFrames = 0;
+    }
+
+    this.explosion
+      .clear()
+      .circle(0, 0, 5 * this.explosionFrames)
+      .stroke({ width: 6, color: 0xfeeb77 });
+
+    this.explosionFrames++;
+
+    if (this.explosionFrames > 50) {
+      this.explosionFrames = 0;
+      this.hit = false;
+      this.explosion.destroy();
+      this.explosion = null;
+    }
+  };
+
+  update() {
+    super.update();
+
+    if (this.hit) {
+      this.updateExplosion();
+    }
   }
 }

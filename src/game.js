@@ -78,6 +78,7 @@ export default class Game {
   };
 
   gameOver = () => {
+    this.isBossFight = false;
     this.gameOverText = new TitleText({
       x: this.stage.width / 2,
       y: this.stage.height / 2,
@@ -266,6 +267,7 @@ export default class Game {
         obj2.destroy();
         this.tank.bullets = this.tank.bullets.filter((e) => e != obj2);
         if (this.isBossFight && this.bossArmor) {
+          this.enemies[0].hit = true;
           return this.bossArmor--;
         }
         return this.destroyTank(obj1);
