@@ -40,8 +40,8 @@ export default class Game {
     this.scoreMeter = new Score();
     this.explosion = new ExplosionFabric();
     this.tank = new Tank(this.defaultTankProperties);
-    this.initalEnemyAmount = 4;
-    this.enemyAmount = 8;
+    this.initalEnemyAmount = 1;
+    this.enemyAmount = 1;
     this.enemyIndicator = new EnemyIndicator({
       amount: this.enemyAmount,
       x: this.stageDimensions.width,
@@ -130,6 +130,7 @@ export default class Game {
       if (!this.enemies.length && !this.isBossFight) {
         this.isBossFight = true;
         this.addEnemyBoss();
+        this;
       } else if (!this.enemies.length && this.isBossFight) {
         this.isBossFight = false;
         setTimeout(() => alert('You WIN!'), 1000);
@@ -266,6 +267,8 @@ export default class Game {
         obj2.destroy();
         this.tank.bullets = this.tank.bullets.filter((e) => e != obj2);
         if (this.isBossFight && this.bossArmor) {
+          console.log(this.enemies[0]);
+          this.enemies[0].hit = true;
           return this.bossArmor--;
         }
         return this.destroyTank(obj1);

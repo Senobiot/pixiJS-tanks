@@ -1,4 +1,4 @@
-import { Assets, Point, Sprite } from 'pixi.js';
+import { Assets, Point, Sprite, Graphics } from 'pixi.js';
 import Enemy from '..';
 import Bullet from '../../Bullet';
 
@@ -7,6 +7,10 @@ export default class Mammoth extends Enemy {
     super({ ...rest });
     this.changeDirectionInterval = 4000;
     this.speed = speed;
+    // this.explosion = new Graphics();
+    // this.explosion.position.set(0, 0);
+    this.explosionFrames = 0;
+    this.hit = false;
   }
 
   shoot = () => {
@@ -57,5 +61,43 @@ export default class Mammoth extends Enemy {
     this.addChild(this.leftBarrel);
     this.addChild(this.rightBarrel);
     this.addChild(this.topBarrel);
+  }
+
+  updateExplosion = () => {
+    if (!this.explosion) {
+      this.explosion = new Graphics();
+      this.explosion.position.set(this.x, this.y);
+      this.addChild(this.explosion);
+    }
+
+    this.explosion.beginFill(0xff4500, 1 - this.explosionFrames * 0.05);
+    this.explosion.ellipse(this.x, this.y, 30 - this.explosionFrames * 2);
+    this.explosion.endFill();
+
+    this.explosion.beginFill(0xffff00, 1 - this.explosionFrames * 0.05);
+    this.explosion.ellipse(this.x, this.y, 20 - this.explosionFrames * 2);
+    this.explosion.endFill();
+
+    this.explosionFrames++;
+
+    if (this.explosionFrames > 15) {
+      this.explosionFrames = 0;
+      this.explosion.clear();
+      this.explosion.destroy();
+      this.explosion = null;
+      this.hit = false;
+    }
+    console.log(this.explosion);
+  };
+
+  update() {
+    console.log('Boss - super');
+    console.log(this.super);
+    super.update();
+
+    if (this.hit) {
+      console.log('update');
+      this.updateExplosion();
+    }
   }
 }

@@ -106,13 +106,13 @@ export default class Tank extends Container {
     }
   };
 
-  update = () => {
+  update() {
     this.updateBullets();
 
     if (this.isMoving) {
       this.movingBehavior();
     }
-  };
+  }
 
   selfDestroy() {
     if (this.bullets.length) {
