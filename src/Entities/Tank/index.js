@@ -10,6 +10,7 @@ export default class Tank extends Container {
     color,
   }) {
     super();
+    console.log(stageDimensions);
     this.loadAssets(color);
     this.x = position.x;
     this.y = position.y;

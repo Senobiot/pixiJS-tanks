@@ -89,9 +89,16 @@ export const manifest = {
       name: 'ground',
       assets: [
         {
-          alias: 'ground-sheet',
-          src: '/assets/terrainTiles.png',
+          alias: 'ground',
+          src: '/assets/ground/groundTiles.png',
         },
+      ],
+    },
+    {
+      name: 'trees',
+      assets: [
+        { alias: 'tree-red', src: '/assets/trees/red.png' },
+        { alias: 'tree-green', src: '/assets/trees/green.png' },
       ],
     },
     {

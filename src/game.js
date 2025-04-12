@@ -26,9 +26,11 @@ import EnemyIndicator from './Entities/UI/EnemyIndicator';
 import Mammoth from './Entities/Enemy/Boss';
 
 export default class Game {
-  constructor(app) {
-    this.app = app;
-    this.stage = app.stage;
+  constructor(mapContainer, obstacles) {
+    this.obstacles = obstacles;
+    // this.app = app;
+    // this.stage = app.stage;
+    this.stage = mapContainer;
     this.stageDimensions = this.stage.getBounds();
 
     this.defaultTankProperties = {
@@ -71,10 +73,10 @@ export default class Game {
     removeKeyboardListener('keydown', this);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
-    addGameListener('contextmenu', canvasContextMenu, this);
-    addGameListener('mousedown', canvasMouseDown, this);
-    addGameListener('mouseup', canvasMouseUp, this);
-    addGameListener('mousemove', canvasMouseMove, this);
+    // addGameListener('contextmenu', canvasContextMenu, this);
+    // addGameListener('mousedown', canvasMouseDown, this);
+    // addGameListener('mouseup', canvasMouseUp, this);
+    // addGameListener('mousemove', canvasMouseMove, this);
   };
 
   gameOver = () => {
@@ -89,10 +91,10 @@ export default class Game {
     this.stage.addChild(this.gameOverText);
     removeKeyboardListener('keydown', this);
     removeKeyboardListener('keyup', this);
-    removeGameListener('contextmenu', this);
-    removeGameListener('mousedown', this);
-    removeGameListener('mouseup', this);
-    removeGameListener('mousemove', this);
+    // removeGameListener('contextmenu', this);
+    // removeGameListener('mousedown', this);
+    // removeGameListener('mouseup', this);
+    // removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
   };
 
@@ -215,6 +217,7 @@ export default class Game {
             for (let j = 0; j < neighborObjects.length; j++) {
               if (objects[i] !== neighborObjects[j]) {
                 if (isCollision(objects[i], neighborObjects[j])) {
+                  console.log(objects[i].type, neighborObjects[j].type);
                   return this.setCollisionAction(
                     objects[i],
                     neighborObjects[j]
@@ -245,6 +248,12 @@ export default class Game {
       });
 
       this.addToGrid(this.tank);
+    }
+
+    if (this.obstacles) {
+      this.obstacles.forEach((obstacle) => {
+        this.addToGrid(obstacle);
+      });
     }
 
     this.checkCollisions();

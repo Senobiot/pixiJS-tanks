@@ -44,7 +44,6 @@ export default class EnemyIndicator extends Container {
 
     if (alignRight) {
       this.x = this.x - this.getBounds().width - 20;
-      console.log(this.x);
     }
   };
 
