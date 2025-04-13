@@ -3,12 +3,14 @@ import { Application, Assets, Container, Graphics } from 'pixi.js';
 import { manifest } from './assetsMap';
 import level_1 from './data/level-1.json';
 import Game from './game';
-
+import { getScreenSize } from './utils';
 import levelLaoader from './utils/levelLoader';
 
 (async () => {
   const app = new Application();
-  await app.init({ width: 1600, height: 900 });
+  // const screenSize = getScreenSize();
+  const screenSize = { width: 640, height: 512 };
+  await app.init(screenSize);
   // initDevtools({ app });
 
   await Assets.init({ manifest });
@@ -17,7 +19,10 @@ import levelLaoader from './utils/levelLoader';
   const obstacles = await levelLaoader(level_1, mapContainer);
 
   const mask = new Graphics();
-  mask.beginFill(0x000000).drawRect(0, 0, 1600, 900).endFill();
+  mask
+    .beginFill(0x000000)
+    .drawRect(0, 0, screenSize.width, screenSize.height)
+    .endFill();
   mapContainer.mask = mask;
 
   // const game = new Game(app);

@@ -1,4 +1,5 @@
 import { Sprite, Texture, Rectangle, Assets } from 'pixi.js';
+import { TYPE } from '../constants';
 
 const levelLaoader = async (levelMap, stage) => {
   const { tilesets, layers } = levelMap;
@@ -60,7 +61,7 @@ const levelLaoader = async (levelMap, stage) => {
         tile.x = x;
         tile.y = y;
         if (name === 'trees') {
-          tile.type = 'tree';
+          tile.type = TYPE.obstacles.tree;
           obstacles.push(tile);
         }
         stage.addChild(tile);

@@ -10,7 +10,6 @@ export default class Tank extends Container {
     color,
   }) {
     super();
-    console.log(stageDimensions);
     this.loadAssets(color);
     this.x = position.x;
     this.y = position.y;
@@ -97,8 +96,14 @@ export default class Tank extends Container {
   updateBullets = () => {
     if (this.bullets.length) {
       this.bullets = this.bullets.filter((bullet) => {
+        if (bullet.destroyed) {
+          bullet.parent.removeChild(bullet);
+          bullet.destroy();
+          return false;
+        }
         bullet.update();
         if (this.outOfBounds(bullet.x, bullet.y)) {
+          bullet.parent.removeChild(bullet);
           bullet.destroy();
           return false;
         }
@@ -116,10 +121,15 @@ export default class Tank extends Container {
   }
 
   selfDestroy() {
-    if (this.bullets.length) {
+    if (this.bullets && this.bullets.length) {
       this.bullets.forEach((e) => e.destroy());
       this.bullets = [];
     }
+
+    if (this.parent) {
+      this.parent.removeChild(this);
+    }
+
     this.destroy();
   }
 

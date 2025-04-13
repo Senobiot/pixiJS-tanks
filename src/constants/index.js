@@ -7,6 +7,7 @@ export const TYPE = {
     player: 'playerTank',
     enemy: 'enemyTank',
   },
+  obstacles: { tree: 'tree' },
 };
 
 export const ASSETS_COLORS = {
