@@ -26,9 +26,11 @@ import EnemyIndicator from './Entities/UI/EnemyIndicator';
 import Mammoth from './Entities/Enemy/Boss';
 
 export default class Game {
-  constructor(app) {
-    this.app = app;
-    this.stage = app.stage;
+  constructor(mapContainer, obstacles) {
+    this.obstacles = obstacles;
+    // this.app = app;
+    // this.stage = app.stage;
+    this.stage = mapContainer;
     this.stageDimensions = this.stage.getBounds();
 
     this.defaultTankProperties = {
@@ -71,10 +73,10 @@ export default class Game {
     removeKeyboardListener('keydown', this);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
-    addGameListener('contextmenu', canvasContextMenu, this);
-    addGameListener('mousedown', canvasMouseDown, this);
-    addGameListener('mouseup', canvasMouseUp, this);
-    addGameListener('mousemove', canvasMouseMove, this);
+    // addGameListener('contextmenu', canvasContextMenu, this);
+    // addGameListener('mousedown', canvasMouseDown, this);
+    // addGameListener('mouseup', canvasMouseUp, this);
+    // addGameListener('mousemove', canvasMouseMove, this);
   };
 
   gameOver = () => {
@@ -89,10 +91,10 @@ export default class Game {
     this.stage.addChild(this.gameOverText);
     removeKeyboardListener('keydown', this);
     removeKeyboardListener('keyup', this);
-    removeGameListener('contextmenu', this);
-    removeGameListener('mousedown', this);
-    removeGameListener('mouseup', this);
-    removeGameListener('mousemove', this);
+    // removeGameListener('contextmenu', this);
+    // removeGameListener('mousedown', this);
+    // removeGameListener('mouseup', this);
+    // removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
   };
 
@@ -100,9 +102,29 @@ export default class Game {
     if (this.tank) {
       this.tank.update();
     }
-    if (this.enemies.length && this.tank) {
+
+    if (this.enemies.length) {
+      this.enemies.forEach((enemy) => enemy.update());
+    }
+
+    if (this.tank || this.enemies.length) {
       this.updateCollision();
     }
+  };
+
+  detonate = (obj) => {
+    const { x, y, width, height } = obj;
+    const explosionX = x - width;
+    const explosionY = y - height;
+
+    const explosion = this.explosion.createAnimation({
+      x: explosionX,
+      y: explosionY,
+    });
+
+    obj.destroy();
+    this.obstacles = this.obstacles.filter((e) => e !== obj);
+    this.stage.addChild(explosion);
   };
 
   destroyTank = (tank, index) => {
@@ -127,6 +149,7 @@ export default class Game {
       this.currentScore += 100;
       this.scoreMeter.score = this.currentScore;
       tank.selfDestroy();
+      tank.destroyed = true;
       this.enemies = this.enemies.filter((e) => e !== tank);
       if (!this.enemies.length && !this.isBossFight) {
         this.isBossFight = true;
@@ -136,28 +159,9 @@ export default class Game {
         setTimeout(() => alert('You WIN!'), 1000);
       }
     } else {
-      this.stage.addChild(
-        this.explosion.createAnimation({
-          x: this.tank.x,
-          y: this.tank.y,
-        })
-      );
-
       this.gameOver();
       this.tank.selfDestroy();
       this.tank = null;
-
-      this.enemies.forEach((enemy) => {
-        this.stage.addChild(
-          this.explosion.createAnimation({
-            x: enemy.x,
-            y: enemy.y,
-          })
-        );
-        enemy.selfDestroy();
-      });
-
-      this.enemies = [];
     }
   };
 
@@ -185,103 +189,166 @@ export default class Game {
     this.bossArmor = 5;
   };
 
-  addToGrid(obj) {
-    const startX = Math.floor(obj.x / this.gridSize);
-    const startY = Math.floor(obj.y / this.gridSize);
-    const endX = Math.floor((obj.x + obj.width) / this.gridSize);
-    const endY = Math.floor((obj.y + obj.height) / this.gridSize);
-
-    for (let x = startX; x <= endX; x++) {
-      for (let y = startY; y <= endY; y++) {
-        const key = `${x},${y}`;
-        if (!this.grid.has(key)) this.grid.set(key, []);
-        this.grid.get(key).push(obj);
-      }
+  updateCollision = () => {
+    // player bullets VS tress
+    if (this.tank) {
+      this.obstacles.forEach((tree) => {
+        let collision = isCollision(tree, this.tank);
+        if (collision) {
+          this.setCollisionAction(tree, this.tank, collision);
+        }
+        const playerBullets = this.tank.bullets;
+        playerBullets.forEach((bullet) => {
+          collision = isCollision(tree, bullet);
+          if (collision) {
+            this.setCollisionAction(tree, bullet);
+          }
+        });
+      });
     }
-  }
 
-  checkCollisions() {
-    for (const [key, objects] of this.grid.entries()) {
-      const [x, y] = key.split(',').map(Number);
+    //enemy VS trees
+    this.obstacles.forEach((tree) => {
+      this.enemies.forEach((enemy) => {
+        if (enemy.destroyed) return;
+        const collision = isCollision(tree, enemy);
+        if (collision) {
+          this.setCollisionAction(tree, enemy, collision);
+        }
+      });
+    });
 
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          const neighborKey = `${x + dx},${y + dy}`;
-          if (!this.grid.has(neighborKey)) continue;
+    if (this.tank) {
+      const playerBullets = this.tank.bullets;
+      this.enemies.forEach((enemy) => {
+        if (enemy.destroyed) return;
 
-          const neighborObjects = this.grid.get(neighborKey);
+        // enemy VS player
+        const collisionWithEnemy = isCollision(this.tank, enemy);
+        if (collisionWithEnemy) {
+          this.setCollisionAction(this.tank, enemy, collisionWithEnemy);
+        }
 
-          for (let i = 0; i < objects.length; i++) {
-            for (let j = 0; j < neighborObjects.length; j++) {
-              if (objects[i] !== neighborObjects[j]) {
-                if (isCollision(objects[i], neighborObjects[j])) {
-                  return this.setCollisionAction(
-                    objects[i],
-                    neighborObjects[j]
-                  );
-                }
-              }
+        // enemy VS player bullets
+        playerBullets.forEach((bullet) => {
+          if (bullet.destroyed || enemy.destroyed) return;
+
+          const collision = isCollision(bullet, enemy);
+          if (collision) {
+            this.setCollisionAction(bullet, enemy, collision);
+          }
+        });
+
+        if (enemy.destroyed) return;
+
+        // enemy bullets VS player
+        enemy.bullets.forEach((bullet) => {
+          const collision = isCollision(bullet, this.tank);
+          if (collision) {
+            this.setCollisionAction(bullet, this.tank);
+          }
+        });
+      });
+
+      // enemy bullets VS trees
+      this.enemies.forEach((enemy) => {
+        enemy.bullets.forEach((bullet) => {
+          this.obstacles.forEach((tree) => {
+            const collision = isCollision(tree, bullet);
+            if (collision) {
+              this.setCollisionAction(tree, bullet);
             }
+          });
+        });
+      });
+
+      // enemy VS enemy
+      for (let i = 0; i < this.enemies.length; i++) {
+        const enemyA = this.enemies[i];
+        if (enemyA.destroyed) continue;
+        for (let j = i + 1; j < this.enemies.length; j++) {
+          const enemyB = this.enemies[j];
+          if (enemyB.destroyed) continue;
+          const collision = isCollision(enemyA, enemyB);
+          if (collision) {
+            this.setCollisionAction(enemyA, enemyB, collision);
           }
         }
       }
     }
-  }
-
-  updateCollision() {
-    this.grid.clear();
-    this.enemies.forEach((enemy) => {
-      this.addToGrid(enemy);
-
-      enemy.update();
-      if (enemy.bullets) {
-        enemy.bullets.forEach((bullet) => this.addToGrid(bullet));
-      }
-    });
-
-    if (this.tank) {
-      this.tank.bullets.forEach((bullet) => {
-        this.addToGrid(bullet);
-      });
-
-      this.addToGrid(this.tank);
-    }
-
-    this.checkCollisions();
-  }
-
-  getTankCoordinates = () => {
-    if (!this.tank) return null;
-    return {
-      x: this.tank.x,
-      y: this.tank.y,
-    };
   };
 
-  setCollisionAction = (obj1, obj2) => {
+  setCollisionAction = (obj1, obj2, side) => {
+    const {
+      tank: { player: playerTank, enemy: enemyTank },
+      bullets: { player: playerBullet, enemy: enemyBullet },
+      obstacles: { tree },
+    } = TYPE;
+
     switch (obj1.type + obj2.type) {
-      case `${TYPE.bullets.player}${TYPE.tank.enemy}`:
-        console.log('---- never  collide ??? ----');
-        return this.destroyTank(obj2);
-      case `${TYPE.tank.enemy}${TYPE.bullets.player}`:
-        obj2.destroy();
-        this.tank.bullets = this.tank.bullets.filter((e) => e != obj2);
-        if (this.isBossFight && this.bossArmor) {
-          this.enemies[0].hit = true;
-          return this.bossArmor--;
+      case tree + playerTank:
+      case tree + enemyTank:
+        if (side === 'left') obj2.x += 1;
+        if (side === 'right') obj2.x -= 1;
+        if (side === 'top') obj2.y += 1;
+        if (side === 'bottom') obj2.y -= 1;
+        break;
+
+      case tree + playerBullet:
+      case tree + enemyBullet:
+        obj2.destroyed = true;
+        break;
+
+      case playerTank + enemyTank:
+        if (side === 'left') {
+          if (obj1.isMoving) {
+            obj1.x -= 1;
+          } else {
+            obj2.x += 1;
+          }
         }
-        return this.destroyTank(obj1);
-      case `${TYPE.tank.player}${TYPE.bullets.enemy}`:
-      case `${TYPE.bullets.enemy}${TYPE.tank.player}`:
-        return this.destroyTank(this.tank, -1);
-      case `${TYPE.tank.enemy}${TYPE.tank.enemy}`:
-        obj1.movingDirection = 'drivingLeft';
-        return (obj2.movingDirection = 'drivingRight');
-      case `${TYPE.tank.enemy}${TYPE.tank.player}`:
-      case `${TYPE.tank.player}${TYPE.tank.enemy}`:
+        if (side === 'right') {
+          if (obj1.isMoving) {
+            obj1.x += 1;
+          } else {
+            obj2.x -= 1;
+          }
+        }
+        if (side === 'top') {
+          if (obj1.isMoving) {
+            obj1.y -= 1;
+          } else {
+            obj1.y += 1;
+          }
+        }
+        if (side === 'bottom') {
+          if (obj1.isMoving) {
+            obj1.y += 1;
+          } else {
+            obj1.y -= 1;
+          }
+        }
+        break;
+
+      case enemyTank + enemyTank:
         obj1.isMoving = false;
         obj2.isMoving = false;
-      default:
+        break;
+
+      case playerBullet + enemyTank:
+        obj1.destroyed = true;
+
+        if (this.isBossFight && this.bossArmor) {
+          this.enemies[0].hit = true;
+          this.bossArmor--;
+          break;
+        }
+        this.destroyTank(obj2);
+        break;
+
+      case enemyBullet + playerTank:
+        obj1.destroyed = true;
+        this.destroyTank(this.tank, -1);
         break;
     }
   };

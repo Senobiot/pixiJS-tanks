@@ -47,12 +47,46 @@ export const keyUpHandler = (event, game) => {
   if (direction) {
     if (game.tank.movingDirection === direction) {
       game.tank.isMoving = false;
-      //  tank.movingDirection = null;
     }
   }
 };
 
 export const isCollision = (s1, s2) => {
+  if (!s1 || !s2) return false;
+
+  const b1 = s1.getBounds();
+  const b2 = s2.getBounds();
+
+  const isColliding =
+    b1.x < b2.x + b2.width &&
+    b1.x + b1.width > b2.x &&
+    b1.y < b2.y + b2.height &&
+    b1.y + b1.height > b2.y;
+
+  if (!isColliding) return false;
+
+  const b1CenterX = b1.x + b1.width / 2;
+  const b1CenterY = b1.y + b1.height / 2;
+  const b2CenterX = b2.x + b2.width / 2;
+  const b2CenterY = b2.y + b2.height / 2;
+
+  const dx = b1CenterX - b2CenterX;
+  const dy = b1CenterY - b2CenterY;
+
+  const halfWidths = (b1.width + b2.width) / 2;
+  const halfHeights = (b1.height + b2.height) / 2;
+
+  const overlapX = halfWidths - Math.abs(dx);
+  const overlapY = halfHeights - Math.abs(dy);
+
+  if (overlapX < overlapY) {
+    return dx > 0 ? 'right' : 'left';
+  } else {
+    return dy > 0 ? 'bottom' : 'top';
+  }
+};
+
+export const obstacleCollision = (s1, s2) => {
   if (!s1 || !s2) return false;
 
   const b1 = s1.getBounds();
@@ -69,3 +103,8 @@ export const isCollision = (s1, s2) => {
 export const getRandomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+export const getScreenSize = () => ({
+  width: window.innerWidth - 20,
+  height: window.innerHeight - 20,
+});

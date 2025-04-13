@@ -23,10 +23,8 @@ export default class Enemy extends Tank {
     ];
 
     const randomPosition = this.startPosition || getRandomNumber(1, 4);
-
     const initialPosition = possibleStartPositions[randomPosition - 1];
 
-    console.log(`enemy Initial position ${initialPosition}`);
     this.x = initialPosition.x;
     this.y = initialPosition.y;
     this.movingDirection = randomPosition > 2 ? 'drivingUp' : 'drivingDown';
