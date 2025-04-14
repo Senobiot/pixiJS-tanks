@@ -12,8 +12,8 @@ import GameOver from './Scenes/UI/Screens/GameOver';
   const margins = { x: 50, y: 50 };
   const { width, height } = getScreenSize();
   const appSize = {
-    width: width - margins.x * 2,
-    height: height - margins.y * 2,
+    width: width > 1600 ? 1600 - margins.x * 2 : width - margins.x * 2,
+    height: height > 900 ? 900 - margins.y * 2 : height - margins.y * 2,
   };
 
   const app = new Application();
