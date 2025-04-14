@@ -1,4 +1,4 @@
-import { Container, Sprite, Point, Assets } from 'pixi.js';
+import { Container, Sprite, Point, Assets, mapSize } from 'pixi.js';
 import Bullet from '../Bullet';
 import { TYPE, ASSETS_COLORS } from '../../constants';
 export default class Tank extends Container {
@@ -8,14 +8,21 @@ export default class Tank extends Container {
     rotationSpeed = 0.05,
     position = { x: 50, y: 150 },
     color,
+    isPlayerOwned,
+    mapSize = {},
+    mapContainer = {},
   }) {
     super();
     this.loadAssets(color);
-    this.x = position.x;
-    this.y = position.y;
 
+    this.x = (mapContainer.screenMargins?.x || 0) + position.x;
+    this.y = (mapContainer.screenMargins?.y || 0) + position.y;
+    this.isPlayerOwned = isPlayerOwned;
+    this.mapContainer = mapContainer;
+    this.mapSize = mapSize;
     this.stageWidth = stageDimensions.width;
     this.stageHeight = stageDimensions.height;
+    this.mapSize = mapSize;
     this.isMoving = false;
     this.movingDirection = null;
     this.drivingLeft = false;
@@ -35,16 +42,16 @@ export default class Tank extends Container {
       // для отвязки пули от движения танка
       new Point(0, this.barrel.height)
     );
-
+    const bulletLocalPos = this.parent.toLocal(barrelGlobalPosition);
     const bullet = new Bullet(this.rotation, this.bulletType, this.color);
-    bullet.x = barrelGlobalPosition.x;
-    bullet.y = barrelGlobalPosition.y;
+    bullet.x = bulletLocalPos.x;
+    bullet.y = bulletLocalPos.y;
     this.parent.addChild(bullet); // для привязки пули к сцене а не танку
     this.bullets.push(bullet);
   };
 
   outOfBounds = (x, y) => {
-    return x < 0 || x > this.stageWidth || y < 0 || y > this.stageHeight;
+    return x < 0 || x > this.mapSize.width || y < 0 || y > this.mapSize.height;
   };
 
   movingBehavior = () => {
@@ -79,13 +86,34 @@ export default class Tank extends Container {
       ) {
         this.x = newX;
         this.y = newY;
+        if (this.isPlayerOwned) {
+          this.checkViewArea(newX, newY);
+        }
       } else {
         if (this.initialMovement) {
+          // враги выезжают из-зза экрана
           this.x = newX;
           this.y = newY;
         }
       }
     }
+  };
+
+  checkViewArea = (tankX, tankY) => {
+    let desiredOffsetX = -tankX + this.stageWidth / 2;
+    let desiredOffsetY = -tankY + this.stageHeight / 2;
+
+    desiredOffsetX = Math.min(
+      50,
+      Math.max(desiredOffsetX, -(this.mapSize.width - this.stageWidth - 50))
+    );
+    desiredOffsetY = Math.min(
+      50,
+      Math.max(desiredOffsetY, -(this.mapSize.height - this.stageHeight - 50))
+    );
+
+    this.mapContainer.x = desiredOffsetX;
+    this.mapContainer.y = desiredOffsetY;
   };
 
   calculateShortestRotation = (currentAngle, targetAngle) => {

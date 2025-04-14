@@ -26,22 +26,29 @@ import EnemyIndicator from './Entities/UI/EnemyIndicator';
 import Mammoth from './Entities/Enemy/Boss';
 
 export default class Game {
-  constructor(mapContainer, obstacles) {
+  constructor(mapContainer, obstacles, originalSize) {
     this.obstacles = obstacles;
-    // this.app = app;
-    // this.stage = app.stage;
     this.stage = mapContainer;
+    this.mapSize = originalSize;
     this.stageDimensions = this.stage.getBounds();
 
     this.defaultTankProperties = {
       stageDimensions: this.stageDimensions,
+      mapSize: this.mapSize,
+    };
+
+    this.playerTankProperties = {
+      stageDimensions: this.stageDimensions,
+      mapContainer,
+      mapSize: this.mapSize,
+      isPlayerOwned: true,
     };
 
     this.gridSize = 100;
     this.grid = new Map();
     this.scoreMeter = new Score();
     this.explosion = new ExplosionFabric();
-    this.tank = new Tank(this.defaultTankProperties);
+    this.tank = new Tank(this.playerTankProperties);
     this.initalEnemyAmount = 4;
     this.enemyAmount = 8;
     this.enemyIndicator = new EnemyIndicator({
@@ -64,7 +71,7 @@ export default class Game {
       this.currentScore = 0;
       this.scoreMeter.score = 0;
       this.stage.removeChild(this.gameOverText);
-      this.tank = new Tank(this.defaultTankProperties);
+      this.tank = new Tank(this.playerTankProperties);
     }
     this.stage.addChild(this.enemyIndicator);
     this.stage.addChild(this.tank);
