@@ -7,26 +7,28 @@ import { getScreenSize } from './utils';
 import levelLaoader from './utils/levelLoader';
 
 (async () => {
+  const mx = 100;
   const app = new Application();
-  // const screenSize = getScreenSize();
-  const screenSize = { width: 640, height: 512 };
+  const screenSize = getScreenSize();
   await app.init(screenSize);
   // initDevtools({ app });
 
   await Assets.init({ manifest });
   const mapContainer = new Container();
+
   app.stage.addChild(mapContainer);
   const obstacles = await levelLaoader(level_1, mapContainer);
+  const originalSize = mapContainer.getSize();
+  const mask = new Graphics()
+    .rect(mx / 2, mx / 2, screenSize.width - mx, screenSize.height - mx)
+    .fill(0xffffff);
 
-  const mask = new Graphics();
-  mask
-    .beginFill(0x000000)
-    .drawRect(0, 0, screenSize.width, screenSize.height)
-    .endFill();
   mapContainer.mask = mask;
+  mapContainer.screenMargins = { x: mx / 2, y: mx / 2 };
+  mapContainer.x = mx / 2;
+  mapContainer.y = mx / 2;
+  const game = new Game(mapContainer, obstacles, originalSize);
 
-  // const game = new Game(app);
-  const game = new Game(mapContainer, obstacles);
   app.ticker.add(game.update, game);
 
   document.getElementById('pixi-container').appendChild(app.canvas);

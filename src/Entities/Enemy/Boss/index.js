@@ -15,8 +15,10 @@ export default class Mammoth extends Enemy {
       this.leftBarrel.toGlobal(new Point(0, this.leftBarrel.height)),
       this.rightBarrel.toGlobal(new Point(0, this.rightBarrel.height)),
     ];
-
-    barrelGlobalPositions.forEach((point) => {
+    const barrelLocalPos = barrelGlobalPositions.map((barrel) =>
+      this.parent.toLocal(barrel)
+    );
+    barrelLocalPos.forEach((point) => {
       const bullet = new Bullet(this.rotation, this.bulletType, this.color);
       bullet.x = point.x;
       bullet.y = point.y;
@@ -62,8 +64,16 @@ export default class Mammoth extends Enemy {
   updateExplosion = () => {
     if (!this.explosion) {
       this.explosion = new Graphics();
-      this.addChild(this.explosion);
       this.explosionFrames = 0;
+
+      const globalPos = this.toGlobal(new Point(0, 0));
+      const localPos = this.parent.toLocal(globalPos);
+
+      this.explosion = new Graphics();
+      this.explosion.x = localPos.x;
+      this.explosion.y = localPos.y;
+
+      this.parent.addChild(this.explosion);
     }
 
     this.explosion
