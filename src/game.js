@@ -201,6 +201,7 @@ export default class Game {
     const enemy = new Mammoth({
       ...this.defaultTankProperties,
     });
+
     this.enemies.push(enemy);
     this.stage.addChild(enemy);
     this.bossArmor = 5;
@@ -305,10 +306,10 @@ export default class Game {
     switch (obj1.type + obj2.type) {
       case tree + playerTank:
       case tree + enemyTank:
-        if (side === 'left') obj2.x += 1;
-        if (side === 'right') obj2.x -= 1;
-        if (side === 'top') obj2.y += 1;
-        if (side === 'bottom') obj2.y -= 1;
+        if (side === 'left') obj2.x += 2;
+        if (side === 'right') obj2.x -= 2;
+        if (side === 'top') obj2.y += 2;
+        if (side === 'bottom') obj2.y -= 2;
         break;
 
       case tree + playerBullet:
@@ -319,30 +320,30 @@ export default class Game {
       case playerTank + enemyTank:
         if (side === 'left') {
           if (obj1.isMoving) {
-            obj1.x -= 1;
+            obj1.x -= 2;
           } else {
-            obj2.x += 1;
+            obj2.x += 2;
           }
         }
         if (side === 'right') {
           if (obj1.isMoving) {
-            obj1.x += 1;
+            obj1.x += 2;
           } else {
-            obj2.x -= 1;
+            obj2.x -= 2;
           }
         }
         if (side === 'top') {
           if (obj1.isMoving) {
-            obj1.y -= 1;
+            obj1.y -= 2;
           } else {
-            obj2.y += 1;
+            obj2.y += 2;
           }
         }
         if (side === 'bottom') {
           if (obj1.isMoving) {
-            obj1.y += 1;
+            obj1.y += 2;
           } else {
-            obj2.y -= 1;
+            obj2.y -= 2;
           }
         }
         break;

@@ -3,7 +3,7 @@ import Enemy from '..';
 import Bullet from '../../Bullet';
 
 export default class Mammoth extends Enemy {
-  constructor({ speed = 0.25, ...rest } = {}) {
+  constructor({ speed = 1, ...rest } = {}) {
     super({ ...rest });
     this.changeDirectionInterval = 4000;
     this.speed = speed;
@@ -91,8 +91,8 @@ export default class Mammoth extends Enemy {
     }
   };
 
-  update() {
-    super.update();
+  update(deltaTime) {
+    super.update(deltaTime);
 
     if (this.hit) {
       this.updateExplosion();
