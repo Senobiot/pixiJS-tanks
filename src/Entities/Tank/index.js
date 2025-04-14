@@ -4,8 +4,8 @@ import { TYPE, ASSETS_COLORS } from '../../constants';
 export default class Tank extends Container {
   constructor({
     stageDimensions,
-    speed = 1,
-    rotationSpeed = 0.05,
+    speed = 4,
+    rotationSpeed = 0.15,
     position = { x: 50, y: 150 },
     color,
     isPlayerOwned,
@@ -54,7 +54,7 @@ export default class Tank extends Container {
     return x < 0 || x > this.mapSize.width || y < 0 || y > this.mapSize.height;
   };
 
-  movingBehavior = () => {
+  movingBehavior = (deltaTime) => {
     const movementMap = {
       drivingLeft: { angle: Math.PI / 2, x: -1, y: 0 },
       drivingRight: { angle: -Math.PI / 2, x: 1, y: 0 },
@@ -73,10 +73,10 @@ export default class Tank extends Container {
     if (Math.abs(rotationDelta) > 0.01) {
       this.rotation +=
         Math.sign(rotationDelta) *
-        Math.min(Math.abs(rotationDelta), this.rotationSpeed);
+        Math.min(Math.abs(rotationDelta), this.rotationSpeed * deltaTime);
     } else {
-      const newX = this.x + this.speed * target.x;
-      const newY = this.y + this.speed * target.y;
+      const newX = this.x + this.speed * target.x * deltaTime;
+      const newY = this.y + this.speed * target.y * deltaTime;
 
       if (
         !this.outOfBounds(
@@ -121,7 +121,7 @@ export default class Tank extends Container {
     return delta > Math.PI ? delta - Math.PI * 2 : delta;
   };
 
-  updateBullets = () => {
+  updateBullets = (deltaTime) => {
     if (this.bullets.length) {
       this.bullets = this.bullets.filter((bullet) => {
         if (bullet.destroyed) {
@@ -129,7 +129,7 @@ export default class Tank extends Container {
           bullet.destroy();
           return false;
         }
-        bullet.update();
+        bullet.update(deltaTime);
         if (this.outOfBounds(bullet.x, bullet.y)) {
           bullet.parent.removeChild(bullet);
           bullet.destroy();
@@ -140,11 +140,11 @@ export default class Tank extends Container {
     }
   };
 
-  update() {
-    this.updateBullets();
+  update(deltaTime) {
+    this.updateBullets(deltaTime);
 
     if (this.isMoving) {
-      this.movingBehavior();
+      this.movingBehavior(deltaTime);
     }
   }
 

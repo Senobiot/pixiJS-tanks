@@ -114,13 +114,13 @@ export default class Game {
     this.enemies = [];
   };
 
-  update = () => {
+  update = (deltaTime) => {
     if (this.tank) {
-      this.tank.update();
+      this.tank.update(deltaTime);
     }
 
     if (this.enemies.length) {
-      this.enemies.forEach((enemy) => enemy.update());
+      this.enemies.forEach((enemy) => enemy.update(deltaTime));
     }
 
     if (this.tank || this.enemies.length) {
@@ -188,7 +188,7 @@ export default class Game {
       const color = Object.keys(ASSETS_COLORS)[getRandomNumber(0, 4)];
       const enemy = new Enemy({
         ...this.defaultTankProperties,
-        speed: 0.5,
+        speed: 2,
         startPosition: amount > 1 ? index : null,
         color,
       });

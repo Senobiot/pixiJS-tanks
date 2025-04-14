@@ -43,7 +43,8 @@ import GameOver from './Scenes/UI/Screens/GameOver';
     gameOverScreen,
   });
 
-  app.ticker.add(game.update, game);
+  // app.ticker.add(game.update, game);
+  app.ticker.add((ticker) => game.update(ticker.deltaTime));
 
   const gameContainer = document.getElementById('pixi-container');
   gameContainer.appendChild(app.canvas);

@@ -2,7 +2,7 @@ import { Sprite, Texture, Assets } from 'pixi.js';
 import { ASSETS_COLORS } from '../../constants';
 
 export default class Bullet extends Sprite {
-  _speed = 3;
+  _speed = 12;
 
   constructor(direction, type, color) {
     super(Texture.EMPTY);
@@ -14,9 +14,9 @@ export default class Bullet extends Sprite {
     this.loadAssets(color);
   }
 
-  update = () => {
-    this.x -= Math.sin(this.direction) * this._speed;
-    this.y += Math.cos(this.direction) * this._speed;
+  update = (deltaTime) => {
+    this.x -= Math.sin(this.direction) * this._speed * deltaTime;
+    this.y += Math.cos(this.direction) * this._speed * deltaTime;
   };
 
   async loadAssets(color = ASSETS_COLORS.red) {
