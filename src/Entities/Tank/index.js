@@ -1,4 +1,4 @@
-import { Container, Sprite, Point, Assets, mapSize } from 'pixi.js';
+import { Container, Sprite, Point, Assets } from 'pixi.js';
 import Bullet from '../Bullet';
 import { TYPE, ASSETS_COLORS } from '../../constants';
 export default class Tank extends Container {
@@ -15,8 +15,8 @@ export default class Tank extends Container {
     super();
     this.loadAssets(color);
 
-    this.x = (mapContainer.screenMargins?.x || 0) + position.x;
-    this.y = (mapContainer.screenMargins?.y || 0) + position.y;
+    this.x = position.x;
+    this.y = position.y;
     this.isPlayerOwned = isPlayerOwned;
     this.mapContainer = mapContainer;
     this.mapSize = mapSize;
@@ -104,12 +104,12 @@ export default class Tank extends Container {
     let desiredOffsetY = -tankY + this.stageHeight / 2;
 
     desiredOffsetX = Math.min(
-      50,
-      Math.max(desiredOffsetX, -(this.mapSize.width - this.stageWidth - 50))
+      0,
+      Math.max(desiredOffsetX, -(this.mapSize.width - this.stageWidth))
     );
     desiredOffsetY = Math.min(
-      50,
-      Math.max(desiredOffsetY, -(this.mapSize.height - this.stageHeight - 50))
+      0,
+      Math.max(desiredOffsetY, -(this.mapSize.height - this.stageHeight))
     );
 
     this.mapContainer.x = desiredOffsetX;

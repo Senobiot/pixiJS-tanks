@@ -5,31 +5,46 @@ import level_1 from './data/level-1.json';
 import Game from './game';
 import { getScreenSize } from './utils';
 import levelLaoader from './utils/levelLoader';
+import UI from './Scenes/UI';
+import GameOver from './Scenes/UI/Screens/GameOver';
 
 (async () => {
-  const mx = 100;
-  const app = new Application();
-  const screenSize = getScreenSize();
-  await app.init(screenSize);
-  // initDevtools({ app });
+  const margins = { x: 50, y: 50 };
+  const { width, height } = getScreenSize();
+  const appSize = {
+    width: width - margins.x * 2,
+    height: height - margins.y * 2,
+  };
 
+  const app = new Application();
+  await app.init(appSize);
+  // initDevtools({ app });
   await Assets.init({ manifest });
   const mapContainer = new Container();
+  const ui = new UI(appSize.width);
+  const gameOverScreen = new GameOver(appSize);
 
   app.stage.addChild(mapContainer);
+  app.stage.addChild(ui);
+  app.stage.addChild(gameOverScreen);
+
   const obstacles = await levelLaoader(level_1, mapContainer);
-  const originalSize = mapContainer.getSize();
+  const mapFullSize = mapContainer.getSize();
   const mask = new Graphics()
-    .rect(mx / 2, mx / 2, screenSize.width - mx, screenSize.height - mx)
+    .rect(0, 0, appSize.width, appSize.height)
     .fill(0xffffff);
 
   mapContainer.mask = mask;
-  mapContainer.screenMargins = { x: mx / 2, y: mx / 2 };
-  mapContainer.x = mx / 2;
-  mapContainer.y = mx / 2;
-  const game = new Game(mapContainer, obstacles, originalSize);
+  const game = new Game({
+    mapContainer,
+    obstacles,
+    mapFullSize,
+    ui,
+    gameOverScreen,
+  });
 
   app.ticker.add(game.update, game);
 
-  document.getElementById('pixi-container').appendChild(app.canvas);
+  const gameContainer = document.getElementById('pixi-container');
+  gameContainer.appendChild(app.canvas);
 })();

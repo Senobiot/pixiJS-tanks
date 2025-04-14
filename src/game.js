@@ -19,17 +19,21 @@ import {
 import Tank from './Entities/Tank';
 import Enemy from './Entities/Enemy';
 import ExplosionFabric from './Entities/Explosion';
-import Score from './Entities/Score';
-import TitleText from './Entities/Title';
+import TitleText from './Scenes/UI/Screens/GameOver';
 import { ASSETS_COLORS, TYPE } from './constants';
-import EnemyIndicator from './Entities/UI/EnemyIndicator';
 import Mammoth from './Entities/Enemy/Boss';
 
 export default class Game {
-  constructor(mapContainer, obstacles, originalSize) {
+  constructor({
+    mapContainer,
+    obstacles,
+    mapFullSize,
+    ui,
+    gameOverScreen,
+  } = {}) {
     this.obstacles = obstacles;
     this.stage = mapContainer;
-    this.mapSize = originalSize;
+    this.mapSize = mapFullSize;
     this.stageDimensions = this.stage.getBounds();
 
     this.defaultTankProperties = {
@@ -44,38 +48,42 @@ export default class Game {
       isPlayerOwned: true,
     };
 
-    this.gridSize = 100;
-    this.grid = new Map();
-    this.scoreMeter = new Score();
     this.explosion = new ExplosionFabric();
     this.tank = new Tank(this.playerTankProperties);
     this.initalEnemyAmount = 4;
-    this.enemyAmount = 8;
-    this.enemyIndicator = new EnemyIndicator({
-      amount: this.enemyAmount,
-      x: this.stageDimensions.width,
-      alignRight: true,
-    });
-
+    this.defaultEnemyAmount = 8;
+    this.enemyAmount = this.defaultEnemyAmount;
     this.enemies = [];
     this.isBossFight = false;
     this.currentScore = 0;
-    this.gameOverText = null;
+    this.ui = ui;
+    this.setScore = this.ui.score.setScore;
+    this.setEnemies = this.ui.enemyIndicator.setEnemies;
+    this.updateEnemies = this.ui.enemyIndicator.updateEnemies;
+    this.gameOverScreen = gameOverScreen;
     this.start();
   }
 
   start = () => {
-    this.addEnemy(this.initalEnemyAmount);
-    if (this.gameOverText) {
-      // сделать разделение на инициализацию и перезапуск
-      this.currentScore = 0;
-      this.scoreMeter.score = 0;
-      this.stage.removeChild(this.gameOverText);
-      this.tank = new Tank(this.playerTankProperties);
+    if (this.endOfGame) {
+      if (this.enemies.length) {
+        this.destroyAllEnemies();
+      }
+      this.stage.x = 0;
+      this.stage.y = 0;
+      this.gameOverScreen.hide();
     }
-    this.stage.addChild(this.enemyIndicator);
+
+    this.addEnemy(this.initalEnemyAmount);
+    this.tank = new Tank(this.playerTankProperties);
+    this.currentScore = 0;
+    this.setScore(0);
+    this.enemyAmount = this.defaultEnemyAmount - this.initalEnemyAmount;
+    this.setEnemies({
+      amount: this.defaultEnemyAmount,
+    });
     this.stage.addChild(this.tank);
-    this.stage.addChild(this.scoreMeter);
+    this.ui.show();
 
     removeKeyboardListener('keydown', this);
     addKeyboardListener('keydown', keyDownHandler, this);
@@ -87,15 +95,11 @@ export default class Game {
   };
 
   gameOver = () => {
+    this.ui.hide();
     this.isBossFight = false;
-    this.gameOverText = new TitleText({
-      x: this.stage.width / 2,
-      y: this.stage.height / 2,
-      text: `GAME OVER \nScore: ${this.currentScore}`,
-    });
+    this.endOfGame = true;
+    this.gameOverScreen.show(this.currentScore);
 
-    this.stage.removeChild(this.scoreMeter);
-    this.stage.addChild(this.gameOverText);
     removeKeyboardListener('keydown', this);
     removeKeyboardListener('keyup', this);
     // removeGameListener('contextmenu', this);
@@ -103,6 +107,11 @@ export default class Game {
     // removeGameListener('mouseup', this);
     // removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
+  };
+
+  destroyAllEnemies = () => {
+    this.enemies.forEach((e) => e.selfDestroy());
+    this.enemies = [];
   };
 
   update = () => {
@@ -145,16 +154,17 @@ export default class Game {
     });
 
     this.stage.addChild(explosion);
-
+    console.log(this.enemies.length, this.enemyAmount);
     if (index !== -1) {
+      this.updateEnemies();
       if (this.enemies.length < 4 && this.enemyAmount > 0) {
         this.enemyAmount--;
         this.addEnemy();
-        this.enemyIndicator.update();
       }
 
       this.currentScore += 100;
-      this.scoreMeter.score = this.currentScore;
+      this.setScore(this.currentScore);
+      // this.scoreMeter.score = this.currentScore;
       tank.selfDestroy();
       tank.destroyed = true;
       this.enemies = this.enemies.filter((e) => e !== tank);
@@ -325,21 +335,21 @@ export default class Game {
           if (obj1.isMoving) {
             obj1.y -= 1;
           } else {
-            obj1.y += 1;
+            obj2.y += 1;
           }
         }
         if (side === 'bottom') {
           if (obj1.isMoving) {
             obj1.y += 1;
           } else {
-            obj1.y -= 1;
+            obj2.y -= 1;
           }
         }
         break;
 
       case enemyTank + enemyTank:
-        obj1.isMoving = false;
-        obj2.isMoving = false;
+        obj1.movingDirection = 'drivingRight';
+        obj2.movingDirection = 'drivingLeft';
         break;
 
       case playerBullet + enemyTank:
