@@ -7,6 +7,7 @@ import {
   menuControls,
   getRandomNumber,
   removeKeyboardListener,
+  mouseControls,
 } from './utils';
 import {
   addGameListener,
@@ -88,6 +89,10 @@ export default class Game {
     removeKeyboardListener('keydown', this);
     addKeyboardListener('keydown', keyDownHandler, this);
     addKeyboardListener('keyup', keyUpHandler, this);
+    this.stage.eventMode = 'static';
+    this.handleMouseClick = (e) => mouseControls(e, this.tank);
+    this.stage.on('pointerdown', this.handleMouseClick);
+
     // addGameListener('contextmenu', canvasContextMenu, this);
     // addGameListener('mousedown', canvasMouseDown, this);
     // addGameListener('mouseup', canvasMouseUp, this);
@@ -107,6 +112,7 @@ export default class Game {
     // removeGameListener('mouseup', this);
     // removeGameListener('mousemove', this);
     addKeyboardListener('keydown', menuControls, this);
+    this.stage.off('pointerdown', this.handleMouseClick);
   };
 
   destroyAllEnemies = () => {

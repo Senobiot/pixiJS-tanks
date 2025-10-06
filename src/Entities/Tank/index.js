@@ -35,6 +35,7 @@ export default class Tank extends Container {
     this.bulletType = TYPE.bullets.player;
     this.rotationSpeed = rotationSpeed;
     this.color = color;
+    this.pendingShot = false;
   }
 
   shoot = () => {
@@ -121,6 +122,14 @@ export default class Tank extends Container {
     return delta > Math.PI ? delta - Math.PI * 2 : delta;
   };
 
+  setRotationToPoint(x, y, shootAfter = false) {
+    const dx = x - this.x;
+    const dy = y - this.y;
+    const angle = Math.atan2(dy, dx);
+    this.targetRotation = angle - Math.PI / 2;
+    this.pendingShot = shootAfter;
+  }
+
   updateBullets = (deltaTime) => {
     if (this.bullets.length) {
       this.bullets = this.bullets.filter((bullet) => {
@@ -145,6 +154,26 @@ export default class Tank extends Container {
 
     if (this.isMoving) {
       this.movingBehavior(deltaTime);
+    }
+
+    if (this.targetRotation !== undefined) {
+      const delta = this.calculateShortestRotation(
+        this.rotation,
+        this.targetRotation
+      );
+      if (Math.abs(delta) > 0.01) {
+        this.rotation +=
+          Math.sign(delta) *
+          Math.min(Math.abs(delta), this.rotationSpeed * deltaTime);
+      } else {
+        this.rotation = this.targetRotation;
+        this.targetRotation = undefined;
+
+        if (this.pendingShot) {
+          this.shoot();
+          this.pendingShot = false;
+        }
+      }
     }
   }
 

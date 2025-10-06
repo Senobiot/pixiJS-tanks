@@ -3,7 +3,7 @@ import { Application, Assets, Container, Graphics } from 'pixi.js';
 import { manifest } from './assetsMap';
 import level_1 from './data/level-1.json';
 import Game from './game';
-import { getScreenSize } from './utils';
+import { getScreenSize, mouseControls } from './utils';
 import levelLaoader from './utils/levelLoader';
 import UI from './Scenes/UI';
 import GameOver from './Scenes/UI/Screens/GameOver';
@@ -47,5 +47,8 @@ import GameOver from './Scenes/UI/Screens/GameOver';
   app.ticker.add((ticker) => game.update(ticker.deltaTime));
 
   const gameContainer = document.getElementById('pixi-container');
+  gameContainer.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+  });
   gameContainer.appendChild(app.canvas);
 })();

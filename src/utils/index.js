@@ -6,6 +6,20 @@ export const addKeyboardListener = (type, handler, context) => {
   document.addEventListener(type, context._listeners[type]);
 };
 
+export const mouseControls = (e, playerTank) => {
+  const local = playerTank.mapContainer.toLocal(e.global);
+  switch (e.button) {
+    case 0:
+      playerTank.setRotationToPoint(local.x, local.y, true, false);
+      break;
+    case 2:
+      console.log('Правый клик');
+      break;
+    default:
+      console.log('Другая кнопка');
+  }
+};
+
 export const removeKeyboardListener = (type, context) => {
   if (!context._listeners) {
     return;
